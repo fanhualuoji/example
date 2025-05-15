@@ -1,0 +1,759 @@
+{% extends "layout.html" %}
+
+{% block title %}警情数据撤销{% endblock %}
+
+{% block head %}
+<style>
+  .revoke-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+  }
+
+  .revoke-header {
+    background: linear-gradient(135deg, #ff9500, #ff7d00);
+    padding: 2rem;
+    text-align: center;
+    color: white;
+  }
+
+  .revoke-header h2 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.8rem;
+    letter-spacing: -0.5px;
+  }
+
+  .revoke-header p {
+    margin: 1rem 0 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+  }
+
+  .revoke-content {
+    padding: 2rem;
+  }
+
+  .info-box {
+    background: rgba(255, 149, 0, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 149, 0, 0.1);
+  }
+
+  .info-box h3 {
+    color: #ff9500;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .info-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+    color: #374151;
+    font-size: 1rem;
+  }
+
+  .info-list li i {
+    color: #ff9500;
+    font-size: 0.9rem;
+  }
+
+  .form-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .form-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    background: rgba(255, 149, 0, 0.05);
+  }
+
+  .form-header h4 {
+    margin: 0;
+    color: #ff9500;
+    font-weight: 600;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-content {
+    padding: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+    font-size: 0.95rem;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: #ff9500;
+    box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.15);
+    background-color: #fff;
+  }
+
+  .form-select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M8 11.5l-5.5-5.5h11L8 11.5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+  }
+
+  .search-box {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-box .form-control {
+    padding-left: 2.5rem;
+  }
+
+  .search-box .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8e8e93;
+    font-size: 1rem;
+  }
+
+  .btn {
+    border-radius: 10px;
+    font-weight: 500;
+    padding: 0.8rem 1.5rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: #ff9500;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #e68600;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 149, 0, 0.3);
+  }
+
+  .btn-danger {
+    background: #ff3b30;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #e02e24;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 59, 48, 0.3);
+  }
+
+  .btn-secondary {
+    background: #8e8e93;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #7a7a81;
+    transform: translateY(-2px);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* 记录预览样式 */
+  .record-preview {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-top: 2.5rem;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    height: 0;
+    overflow: hidden;
+  }
+
+  .record-preview.active {
+    opacity: 1;
+    transform: translateY(0);
+    height: auto;
+    margin-bottom: 2rem;
+  }
+
+  .preview-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 149, 0, 0.05);
+  }
+
+  .preview-title {
+    margin: 0;
+    color: #ff9500;
+    font-weight: 600;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .record-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    gap: 0.5rem;
+  }
+
+  .status-active {
+    background-color: rgba(52, 199, 89, 0.1);
+    color: #34c759;
+  }
+
+  .status-revoked {
+    background-color: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+  }
+
+  .preview-content {
+    padding: 1.5rem;
+  }
+
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .preview-item {
+    margin-bottom: 1rem;
+  }
+
+  .preview-label {
+    font-size: 0.85rem;
+    color: #8e8e93;
+    margin-bottom: 0.25rem;
+  }
+
+  .preview-value {
+    font-size: 1rem;
+    color: #1d1d1f;
+    word-break: break-word;
+    font-weight: 500;
+  }
+
+  /* 确认模态框 */
+  .confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .confirm-modal.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal-content {
+    background-color: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+  }
+
+  .confirm-modal.active .modal-content {
+    transform: translateY(0);
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 59, 48, 0.05);
+  }
+
+  .modal-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin: 0;
+    color: #ff3b30;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .warning-icon {
+    color: #ff3b30;
+    font-size: 3rem;
+    text-align: center;
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  .modal-message {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #1d1d1f;
+  }
+
+  .modal-info {
+    background-color: #f5f5f7;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-info-item {
+    display: flex;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-info-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .modal-info-label {
+    width: 100px;
+    font-weight: 500;
+    color: #8e8e93;
+  }
+
+  .modal-info-value {
+    font-weight: 500;
+    color: #1d1d1f;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+  }
+
+  .modal-actions .btn {
+    flex: 1;
+  }
+
+  /* 信息提示区 */
+  .info-alert {
+    display: flex;
+    align-items: flex-start;
+    background: rgba(255, 149, 0, 0.05);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 149, 0, 0.1);
+  }
+
+  .info-alert i {
+    color: #ff9500;
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    margin-top: 0.2rem;
+  }
+
+  .info-alert-content {
+    flex: 1;
+  }
+
+  .info-alert-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #1d1d1f;
+    font-size: 1.1rem;
+  }
+
+  .info-alert-text {
+    color: #4c4c4c;
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  /* 动画效果 */
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4);
+    }
+
+    70% {
+      box-shadow: 0 0 0 10px rgba(255, 59, 48, 0);
+    }
+
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 59, 48, 0);
+    }
+  }
+
+  .pulse {
+    animation: pulse 1.5s infinite;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="revoke-container">
+  <div class="revoke-header">
+    <h2><i class="fas fa-ban me-2"></i>警情数据撤销</h2>
+    <p>对已上链的警情记录进行撤销操作</p>
+  </div>
+
+  <div class="revoke-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="info-box">
+      <h3><i class="fas fa-info-circle me-2"></i>撤销说明</h3>
+      <ul class="info-list">
+        <li><i class="fas fa-check-circle"></i>撤销操作将在区块链上标记此记录为"已撤销"状态</li>
+        <li><i class="fas fa-exclamation-triangle"></i>一旦撤销将无法恢复，请确认警情编号和撤销原因</li>
+        <li><i class="fas fa-history"></i>所有撤销操作都会记录审计日志，请谨慎操作</li>
+      </ul>
+    </div>
+
+    <div class="form-card">
+      <div class="form-header">
+        <h4><i class="fas fa-search me-2"></i>查询警情记录</h4>
+      </div>
+      <div class="form-content">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="form-control" id="policeNoInput" placeholder="请输入要撤销的警情编号" required>
+        </div>
+
+        <div class="form-group">
+          <label for="reasonSelect" class="form-label">撤销原因</label>
+          <select class="form-select" id="reasonSelect" required>
+            <option value="">请选择撤销原因...</option>
+            <option value="错误录入">错误录入</option>
+            <option value="重复记录">重复记录</option>
+            <option value="测试数据">测试数据</option>
+            <option value="其他原因">其他原因</option>
+          </select>
+        </div>
+
+        <div class="d-flex mt-4">
+          <button type="button" class="btn btn-danger w-100" id="confirmBtn">
+            <i class="fas fa-ban"></i> 申请撤销
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 记录预览区域 - 删除，不再使用 -->
+
+  </div>
+</div>
+
+<!-- 确认模态框 -->
+<div class="confirm-modal" id="confirmModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>确认撤销</h5>
+      <button type="button" class="btn-close" id="closeModalBtn"></button>
+    </div>
+    <div class="modal-body">
+      <div class="warning-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div class="modal-message">
+        <p>您确定要撤销该警情记录吗？</p>
+        <p><strong>此操作不可逆，请谨慎操作！</strong></p>
+      </div>
+
+      <div class="modal-info">
+        <div class="modal-info-item">
+          <div class="modal-info-label">警情编号：</div>
+          <div class="modal-info-value" id="modalPoliceNo">-</div>
+        </div>
+        <div class="modal-info-item">
+          <div class="modal-info-label">撤销原因：</div>
+          <div class="modal-info-value" id="modalReason">-</div>
+        </div>
+        <!-- 添加更多的关键信息 -->
+        <div class="modal-info-item" id="modalInfoTimeContainer">
+          <div class="modal-info-label">接警时间：</div>
+          <div class="modal-info-value" id="modalInfoTime">-</div>
+        </div>
+        <div class="modal-info-item" id="modalInfoOfficerContainer">
+          <div class="modal-info-label">处置人员：</div>
+          <div class="modal-info-value" id="modalInfoOfficer">-</div>
+        </div>
+        <div class="modal-info-item" id="modalInfoResultContainer">
+          <div class="modal-info-label">处置结果：</div>
+          <div class="modal-info-value" id="modalInfoResult">-</div>
+        </div>
+      </div>
+
+      <form id="revokeForm" method="POST">
+        <input type="hidden" name="police_no" id="revokePoliceNo">
+        <input type="hidden" name="reason" id="revokeReason">
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelBtn">
+            <i class="fas fa-times"></i> 取消
+          </button>
+          <button type="submit" class="btn btn-danger pulse" id="revokeBtn">
+            <i class="fas fa-ban"></i> 确认撤销
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(document).ready(function () {
+    // 获取元素
+    const policeNoInput = document.getElementById('policeNoInput');
+    const reasonSelect = document.getElementById('reasonSelect');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const confirmModal = document.getElementById('confirmModal');
+    const modalPoliceNo = document.getElementById('modalPoliceNo');
+    const modalReason = document.getElementById('modalReason');
+    const modalInfoTime = document.getElementById('modalInfoTime');
+    const modalInfoOfficer = document.getElementById('modalInfoOfficer');
+    const modalInfoResult = document.getElementById('modalInfoResult');
+    const modalInfoTimeContainer = document.getElementById('modalInfoTimeContainer');
+    const modalInfoOfficerContainer = document.getElementById('modalInfoOfficerContainer');
+    const modalInfoResultContainer = document.getElementById('modalInfoResultContainer');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const revokeBtn = document.getElementById('revokeBtn');
+    const revokePoliceNo = document.getElementById('revokePoliceNo');
+    const revokeReason = document.getElementById('revokeReason');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    // 初始化系统状态
+    console.log('初始化撤销系统...');
+
+    // 确认撤销按钮点击事件
+    confirmBtn.addEventListener('click', function () {
+      const policeNo = policeNoInput.value.trim();
+      const reason = reasonSelect.value;
+
+      if (!policeNo) {
+        alert('请输入警情编号');
+        return;
+      }
+
+      if (!reason) {
+        alert('请选择撤销原因');
+        return;
+      }
+
+      // 显示加载状态
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 查询中...';
+
+      // 在显示确认对话框前，先获取一些基本信息
+      fetch(`/api/check_record/${policeNo}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`API请求失败: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          confirmBtn.disabled = false;
+          confirmBtn.innerHTML = '<i class="fas fa-ban"></i> 申请撤销';
+
+          console.log('API返回数据:', data);
+
+          // 设置确认框中的警情编号和撤销原因
+          modalPoliceNo.textContent = policeNo;
+          modalReason.textContent = reason;
+          revokePoliceNo.value = policeNo;
+          revokeReason.value = reason;
+
+          // 如果API返回了记录，显示一些关键信息
+          if (data.success && data.record) {
+            // 简化的数据获取，只找几个关键字段
+            const record = data.record;
+
+            // 接警时间
+            if (record.time || record.receiveTime) {
+              modalInfoTime.textContent = record.time || record.receiveTime;
+              modalInfoTimeContainer.style.display = 'flex';
+            } else {
+              modalInfoTimeContainer.style.display = 'none';
+            }
+
+            // 处置人员
+            if (record.officer) {
+              modalInfoOfficer.textContent = record.officer;
+              modalInfoOfficerContainer.style.display = 'flex';
+            } else {
+              modalInfoOfficerContainer.style.display = 'none';
+            }
+
+            // 处置结果
+            if (record.result) {
+              modalInfoResult.textContent = record.result;
+              modalInfoResultContainer.style.display = 'flex';
+            } else {
+              modalInfoResultContainer.style.display = 'none';
+            }
+
+            // 如果记录已经被撤销，提醒用户
+            if (record.status === 'Revoked' || record.status === '已撤销') {
+              alert('警告：该记录已被撤销！');
+            }
+          } else {
+            // 如果没有找到记录，隐藏额外信息
+            modalInfoTimeContainer.style.display = 'none';
+            modalInfoOfficerContainer.style.display = 'none';
+            modalInfoResultContainer.style.display = 'none';
+
+            if (data.message) {
+              alert(data.message);
+            } else {
+              alert('未找到该警情记录，请确认警情编号是否正确');
+            }
+            return;
+          }
+
+          // 显示确认模态框
+          confirmModal.classList.add('active');
+        })
+        .catch(error => {
+          console.error('查询失败:', error);
+          alert('查询失败，请稍后重试');
+          confirmBtn.disabled = false;
+          confirmBtn.innerHTML = '<i class="fas fa-ban"></i> 申请撤销';
+        });
+    });
+
+    // 取消按钮点击事件
+    cancelBtn.addEventListener('click', function () {
+      confirmModal.classList.remove('active');
+    });
+
+    // 关闭模态框按钮
+    closeModalBtn.addEventListener('click', function () {
+      confirmModal.classList.remove('active');
+    });
+
+    // 确认撤销按钮点击事件（模态框中的）
+    revokeBtn.addEventListener('click', function () {
+      // 提交表单
+      document.getElementById('revokeForm').submit();
+    });
+
+    // 注释掉前端审计记录功能，避免重复记录
+    /* 
+    // 添加审计记录功能
+    $('#revokeForm').on('submit', function (e) {
+      var policeNo = $('#revokePoliceNo').val();
+      var reason = $('#revokeReason').val();
+
+      console.log('提交撤销表单:', { policeNo, reason });
+
+      if (policeNo && reason) {
+        try {
+          if (typeof window.auditTrail !== 'undefined' && typeof window.auditTrail.recordDataRevoke === 'function') {
+            console.log('记录审计数据');
+            window.auditTrail.recordDataRevoke(policeNo, reason);
+          } else {
+            console.log('auditTrail对象不存在或recordDataRevoke不是函数');
+          }
+        } catch (error) {
+          console.error('审计记录错误:', error);
+        }
+      }
+    });
+    */
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,771 @@
+{% extends "layout.html" %}
+
+{% block title %}验证警情记录{% endblock %}
+
+{% block head %}
+<style>
+  .verify-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+  }
+
+  .verify-header {
+    background: linear-gradient(135deg, #0061ff, #60efff);
+    padding: 2rem;
+    text-align: center;
+    color: white;
+  }
+
+  .verify-header h2 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.8rem;
+    letter-spacing: -0.5px;
+  }
+
+  .verify-header p {
+    margin: 1rem 0 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+  }
+
+  .verify-content {
+    padding: 2rem;
+  }
+
+  .info-box {
+    background: rgba(0, 97, 255, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(0, 97, 255, 0.1);
+  }
+
+  .info-box h3 {
+    color: #0061ff;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .info-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+    color: #374151;
+    font-size: 1rem;
+  }
+
+  .info-list li i {
+    color: #0061ff;
+    font-size: 0.9rem;
+  }
+
+  .upload-area {
+    background: rgba(0, 97, 255, 0.02);
+    border: 2px dashed rgba(0, 97, 255, 0.2);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 2rem;
+  }
+
+  .upload-area:hover {
+    background: rgba(0, 97, 255, 0.05);
+    border-color: #0061ff;
+  }
+
+  .upload-icon {
+    font-size: 3.5rem;
+    color: #0061ff;
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease;
+  }
+
+  .upload-area:hover .upload-icon {
+    transform: translateY(-5px);
+  }
+
+  .upload-title {
+    font-weight: 600;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    color: #1d1d1f;
+  }
+
+  .upload-description {
+    color: #6e6e73;
+    max-width: 80%;
+    margin: 0 auto;
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+
+  .file-info {
+    display: none;
+    align-items: center;
+    gap: 1rem;
+    background: #f5f5f7;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-top: 1rem;
+  }
+
+  .file-info i {
+    font-size: 1.5rem;
+    color: #0061ff;
+  }
+
+  .verify-btn {
+    background: linear-gradient(135deg, #0061ff, #60efff);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .verify-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 97, 255, 0.3);
+  }
+
+  .verify-btn:disabled {
+    background: #e5e5e5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .verify-btn i {
+    font-size: 1.2rem;
+  }
+
+  /* 验证结果样式 */
+  .result-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .result-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .result-header.success {
+    background: linear-gradient(135deg, #34c759, #30d158);
+    color: white;
+  }
+
+  .result-header.error {
+    background: linear-gradient(135deg, #ff3b30, #ff453a);
+    color: white;
+  }
+
+  .result-content {
+    padding: 1.5rem;
+  }
+
+  .result-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .result-table th,
+  .result-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .result-table th {
+    background: #f5f5f7;
+    font-weight: 500;
+    text-align: left;
+    color: #1d1d1f;
+    width: 30%;
+  }
+
+  .result-table td {
+    color: #424245;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+
+  .action-btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .action-btn.primary {
+    background: #0061ff;
+    color: white;
+    border: none;
+  }
+
+  .action-btn.secondary {
+    background: #f5f5f7;
+    color: #1d1d1f;
+    border: 1px solid #e5e5e5;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 添加新的样式 */
+  .alert {
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .alert-danger {
+    background-color: #fff1f0;
+    color: #ff3b30;
+    border: 1px solid rgba(255, 59, 48, 0.1);
+  }
+
+  .loading-indicator {
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* 添加新的样式 */
+  .block-info {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .block-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .info-section {
+    margin-bottom: 2rem;
+  }
+
+  .info-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-title {
+    color: #1d1d1f;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+  }
+
+  .hash-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .copy-btn {
+    background: none;
+    border: none;
+    color: #0061ff;
+    padding: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .copy-btn:hover {
+    color: #003ecb;
+    transform: scale(1.1);
+  }
+
+  .badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  .badge i {
+    font-size: 0.8rem;
+  }
+
+  .btn-outline-primary {
+    color: #0061ff;
+    border-color: #0061ff;
+    background: none;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+
+  .btn-outline-primary:hover {
+    background: #0061ff;
+    color: white;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="verify-container">
+  <div class="verify-header">
+    <h2><i class="fas fa-shield-alt me-2"></i>警情数据验证</h2>
+    <p>验证警情记录的真实性和完整性</p>
+  </div>
+
+  <div class="verify-content">
+    {% if verification_success %}
+    {% if verification_failed %}
+    <div class="result-card">
+      <div class="result-header error">
+        <h3 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>验证失败</h3>
+        <p class="mb-0">{{ message|default('PDF文件哈希值与区块链不匹配，警情记录验证失败!') }}</p>
+      </div>
+      <div class="result-content">
+        <table class="result-table">
+          <tr>
+            <th>文件哈希值</th>
+            <td><small class="text-danger">{{ police_info.CurrentHash }}</small></td>
+          </tr>
+          <tr>
+            <th>区块链哈希值</th>
+            <td><small class="text-danger">{{ police_info.Temp_Hash }}</small></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="result-card">
+      <div class="result-header success">
+        <h3 class="mb-0"><i class="fas fa-check-circle me-2"></i>验证成功</h3>
+        <p class="mb-0">{{ message|default('上传的警情记录文件已通过区块链验证，内容完好无篡改。') }}</p>
+        <div class="block-info">
+          <span class="block-badge">
+            <i class="fas fa-cube"></i>
+            区块号：{{ police_info.BlockNum }}
+          </span>
+          <span class="block-badge">
+            <i class="fas fa-clock"></i>
+            上链时间：{{ police_info.UploadTime }}
+          </span>
+        </div>
+      </div>
+      <div class="result-content">
+        <div class="info-section">
+          <h4 class="section-title"><i class="fas fa-file-alt me-2"></i>警情基本信息</h4>
+          <table class="result-table">
+            <tr>
+              <th>警情编号</th>
+              <td>{{ police_info.PoliceNo }}</td>
+            </tr>
+            <tr>
+              <th>接警时间</th>
+              <td>{{ police_info.ReceiveTime }}</td>
+            </tr>
+            <tr>
+              <th>发生地点</th>
+              <td>{{ police_info.Location }}</td>
+            </tr>
+            <tr>
+              <th>地理坐标</th>
+              <td>{{ police_info.GPSLocation }}</td>
+            </tr>
+            <tr>
+              <th>报警人</th>
+              <td>{{ police_info.ContactName }}</td>
+            </tr>
+            <tr>
+              <th>警情描述</th>
+              <td>{{ police_info.Description }}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="info-section">
+          <h4 class="section-title"><i class="fas fa-users me-2"></i>处置信息</h4>
+          <table class="result-table">
+            <tr>
+              <th>处置人员</th>
+              <td>{{ police_info.PoliceOfficer }}</td>
+            </tr>
+            <tr>
+              <th>出警单位</th>
+              <td>{{ police_info.Department }}</td>
+            </tr>
+            <tr>
+              <th>出警时间</th>
+              <td>{{ police_info.DispatchTime }}</td>
+            </tr>
+            <tr>
+              <th>处置结果</th>
+              <td>{{ police_info.Result }}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="info-section">
+          <h4 class="section-title"><i class="fas fa-shield-alt me-2"></i>区块链信息</h4>
+          <table class="result-table">
+            <tr>
+              <th>数据签名Hash</th>
+              <td>
+                <div class="hash-value">
+                  <small class="text-muted">{{ police_info.Temp_Hash }}</small>
+                  <button class="copy-btn" onclick="copyToClipboard('{{ police_info.Temp_Hash }}')">
+                    <i class="fas fa-copy"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>文件哈希值</th>
+              <td>
+                <div class="hash-value">
+                  <small class="text-muted">{{ police_info.CurrentHash }}</small>
+                  <button class="copy-btn" onclick="copyToClipboard('{{ police_info.CurrentHash }}')">
+                    <i class="fas fa-copy"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>区块号</th>
+              <td>
+                {% if police_info.BlockNum and police_info.BlockNum != 'N/A' and police_info.BlockNum != '未上链' %}
+                <span class="badge bg-success"><i class="fas fa-cube me-1"></i>{{ police_info.BlockNum }}</span>
+                {% else %}
+                <span class="badge bg-warning">未上链</span>
+                <a href="{{ url_for('update_block_info', police_no=police_info.PoliceNo) }}"
+                  class="btn btn-sm btn-outline-primary ms-2">
+                  <i class="fas fa-sync-alt me-1"></i>更新区块信息
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th>上链时间</th>
+              <td>{{ police_info.UploadTime }}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="action-buttons">
+      <a href="{{ url_for('verify') }}" class="action-btn primary">
+        <i class="fas fa-redo"></i>继续验证
+      </a>
+      <a href="{{ url_for('query') }}" class="action-btn secondary">
+        <i class="fas fa-search"></i>查询记录
+      </a>
+    </div>
+
+    {% else %}
+    <div class="info-box">
+      <h3><i class="fas fa-info-circle"></i>数据验证说明</h3>
+      <ul class="info-list">
+        <li><i class="fas fa-check"></i>上传警情记录PDF凭证进行真实性验证</li>
+        <li><i class="fas fa-shield-alt"></i>系统将检查该PDF凭证是否经过篡改</li>
+        <li><i class="fas fa-file-alt"></i>验证成功后将显示对应的警情记录详情</li>
+      </ul>
+    </div>
+
+    <form id="verifyForm" method="POST" enctype="multipart/form-data">
+      <input type="file" id="pdffile" name="pdffile" accept=".pdf" required style="display: none;">
+
+      <div class="upload-area" id="upload-area" onclick="document.getElementById('pdffile').click();">
+        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+        <h3 class="upload-title">点击或拖放文件至此处</h3>
+        <p class="upload-description">支持上传由本系统生成的警情记录PDF凭证文件</p>
+
+        <div class="file-info" id="file-info">
+          <i class="fas fa-file-pdf"></i>
+          <span id="file-name"></span>
+          <button type="button" id="file-remove" class="btn btn-link text-danger">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="verify-btn" id="verify-btn" disabled>
+        <i class="fas fa-shield-alt"></i>开始验证
+      </button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('pdffile');
+    const fileInfo = document.getElementById('file-info');
+    const fileName = document.getElementById('file-name');
+    const fileRemove = document.getElementById('file-remove');
+    const uploadArea = document.getElementById('upload-area');
+    const verifyBtn = document.getElementById('verify-btn');
+    const verifyForm = document.getElementById('verifyForm');
+
+    if (fileInput) {
+      fileInput.addEventListener('change', function () {
+        if (fileInput.files.length > 0) {
+          fileName.textContent = fileInput.files[0].name;
+          fileInfo.style.display = 'flex';
+          uploadArea.style.borderColor = '#0061ff';
+          verifyBtn.disabled = false;
+          verifyBtn.innerHTML = '<i class="fas fa-shield-alt"></i>开始验证';
+        } else {
+          fileInfo.style.display = 'none';
+          uploadArea.style.borderColor = 'rgba(0, 97, 255, 0.2)';
+          verifyBtn.disabled = true;
+        }
+      });
+
+      if (fileRemove) {
+        fileRemove.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          fileInput.value = '';
+          fileInfo.style.display = 'none';
+          uploadArea.style.borderColor = 'rgba(0, 97, 255, 0.2)';
+          verifyBtn.disabled = true;
+        });
+      }
+
+      // 拖放功能
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, preventDefaults, false);
+      });
+
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, highlight, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, unhighlight, false);
+      });
+
+      function highlight() {
+        uploadArea.style.background = 'rgba(0, 97, 255, 0.1)';
+        uploadArea.style.borderColor = '#0061ff';
+      }
+
+      function unhighlight() {
+        uploadArea.style.background = 'rgba(0, 97, 255, 0.02)';
+        uploadArea.style.borderColor = 'rgba(0, 97, 255, 0.2)';
+      }
+
+      uploadArea.addEventListener('drop', handleDrop, false);
+
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length > 0 && files[0].type === 'application/pdf') {
+          fileInput.files = files;
+          fileName.textContent = files[0].name;
+          fileInfo.style.display = 'flex';
+          verifyBtn.disabled = false;
+        }
+      }
+    }
+
+    // 修改验证按钮事件
+    if (verifyBtn) {
+      verifyBtn.addEventListener('click', function (e) {
+        // 如果没有选择文件，触发文件选择
+        if (!fileInput.files.length) {
+          e.preventDefault();
+          fileInput.click();
+          return;
+        }
+      });
+    }
+
+    // 修改表单提交处理
+    if (verifyForm) {
+      verifyForm.addEventListener('submit', function (e) {
+        // 如果没有文件，阻止提交
+        if (!fileInput.files.length) {
+          e.preventDefault();
+          return;
+        }
+
+        // 显示加载状态
+        verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>验证中...';
+        verifyBtn.disabled = true;
+
+        // 创建一个隐藏的加载指示器
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'loading-indicator';
+        loadingIndicator.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(255, 255, 255, 0.8);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 9999;
+        `;
+
+        const loadingContent = document.createElement('div');
+        loadingContent.style.cssText = `
+          background: white;
+          padding: 2rem;
+          border-radius: 16px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+          text-align: center;
+        `;
+
+        loadingContent.innerHTML = `
+          <div style="margin-bottom: 1rem;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #0061ff;"></i>
+          </div>
+          <div style="color: #1d1d1f; font-size: 1.1rem; font-weight: 500;">
+            正在验证文件...
+          </div>
+          <div style="color: #6e6e73; font-size: 0.9rem; margin-top: 0.5rem;">
+            请稍候，这可能需要几秒钟
+          </div>
+        `;
+
+        loadingIndicator.appendChild(loadingContent);
+        document.body.appendChild(loadingIndicator);
+
+        // 设置超时处理
+        setTimeout(() => {
+          if (document.body.contains(loadingIndicator)) {
+            loadingIndicator.remove();
+            verifyBtn.innerHTML = '<i class="fas fa-shield-alt"></i>开始验证';
+            verifyBtn.disabled = false;
+
+            // 显示错误提示
+            const errorAlert = document.createElement('div');
+            errorAlert.className = 'alert alert-danger mt-3';
+            errorAlert.innerHTML = `
+              <i class="fas fa-exclamation-circle me-2"></i>
+              验证超时，请重试或检查网络连接
+            `;
+            verifyForm.insertAdjacentElement('beforebegin', errorAlert);
+
+            // 3秒后移除错误提示
+            setTimeout(() => {
+              errorAlert.remove();
+            }, 3000);
+          }
+        }, 30000); // 30秒超时
+
+        // 表单正常提交
+        return true;
+      });
+    }
+  });
+
+  // 添加复制功能
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      // 创建一个临时提示
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        z-index: 10000;
+        animation: fadeInOut 2s ease forwards;
+      `;
+      toast.innerHTML = '<i class="fas fa-check me-2"></i>已复制到剪贴板';
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.remove();
+      }, 2000);
+    });
+  }
+
+  // 添加淡入淡出动画
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, 20px); }
+      20% { opacity: 1; transform: translate(-50%, 0); }
+      80% { opacity: 1; transform: translate(-50%, 0); }
+      100% { opacity: 0; transform: translate(-50%, -20px); }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+{% endblock %}

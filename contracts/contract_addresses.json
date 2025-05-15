@@ -1,0 +1,8 @@
+{
+  "PoliceRecordContract": "0xd95766128fF1a5Fd7f942DcCAf05930906483A95",
+  "AuditTrailContract": "0xF53543DF552E7cfb22458f2Ea092d77ED917f404",
+  "local_1337": {
+    "PoliceRecordContract": "0xd49877ACA1fE85EB380C31e862E1Baa29b5c556c",
+    "AuditTrailContract": "0xeE714214869c5D3f3902988dDBF25c63757CC684"
+  }
+}

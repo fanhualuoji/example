@@ -1,0 +1,9 @@
+[
+  {
+    "police_no": "JQ2023121374",
+    "success": false,
+    "message": "警情记录已存在区块链上，请勿重复上链",
+    "is_duplicate": true,
+    "block_number": 1745720218
+  }
+]

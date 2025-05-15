@@ -1,0 +1,1101 @@
+{% extends "layout.html" %}
+
+{% block title %}数据上链{% endblock %}
+
+{% block head %}
+<style>
+  :root {
+    --apple-blue: #0070F5;
+    --apple-dark-blue: #0255CC;
+    --apple-light-blue: #5AC8FA;
+    --apple-green: #34C759;
+    --apple-gray: #8E8E93;
+    --apple-light-gray: #F2F2F7;
+    --apple-lighter-gray: #F8F8FA;
+    --apple-red: #FF3B30;
+    --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.05), 0 6px 6px rgba(0, 0, 0, 0.03);
+    --hover-shadow: 0 14px 28px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .page-container {
+    padding: 2rem;
+    background: linear-gradient(150deg, #F8F8FA 0%, #F2F2F7 100%);
+    min-height: calc(100vh - 60px);
+  }
+
+  .module-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 24px;
+    box-shadow: var(--card-shadow);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(209, 213, 219, 0.2);
+  }
+
+  .module-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+  }
+
+  .module-header {
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 1));
+    color: #1d1d1f;
+    padding: 1.5rem 1.75rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+    border-bottom: 1px solid rgba(209, 213, 219, 0.2);
+    display: flex;
+    align-items: center;
+  }
+
+  .module-header i {
+    color: var(--apple-blue);
+    margin-right: 0.75rem;
+    font-size: 1.4rem;
+    transform-origin: center;
+    transition: transform 0.3s ease;
+  }
+
+  .module-card:hover .module-header i {
+    transform: scale(1.1);
+  }
+
+  .module-body {
+    padding: 1.75rem;
+    flex: 1;
+  }
+
+  .upload-area {
+    border: 2px dashed rgba(0, 112, 245, 0.3);
+    border-radius: 20px;
+    padding: 3.5rem 2rem;
+    text-align: center;
+    background-color: rgba(242, 242, 247, 0.7);
+    transition: all 0.4s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload-area::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 112, 245, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .upload-area:hover {
+    border-color: var(--apple-blue);
+    background-color: rgba(0, 112, 245, 0.05);
+    transform: scale(1.01);
+  }
+
+  .upload-area:hover::before {
+    opacity: 1;
+  }
+
+  .upload-icon {
+    font-size: 72px;
+    color: var(--apple-blue);
+    margin-bottom: 1.75rem;
+    transition: all 0.5s ease;
+    filter: drop-shadow(0 4px 6px rgba(0, 112, 245, 0.2));
+  }
+
+  .upload-area:hover .upload-icon {
+    transform: translateY(-8px) scale(1.05);
+    color: #0255CC;
+  }
+
+  .instructions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .instructions-list li {
+    position: relative;
+    padding: 1rem 0 1rem 2.25rem;
+    border-bottom: 1px solid rgba(209, 213, 219, 0.2);
+    color: #1d1d1f;
+    font-size: 0.97rem;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+  }
+
+  .instructions-list li:hover {
+    background-color: rgba(0, 112, 245, 0.03);
+    padding-left: 2.5rem;
+  }
+
+  .instructions-list li:last-child {
+    border-bottom: none;
+  }
+
+  .instructions-list li:before {
+    content: "";
+    position: absolute;
+    left: 0.75rem;
+    top: 1.35rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--apple-blue);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+  }
+
+  .instructions-list li:hover:before {
+    transform: scale(1.25);
+    background: #0255CC;
+  }
+
+  .table {
+    margin-bottom: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    border: none;
+  }
+
+  .table th {
+    background: #F5F5F7;
+    font-weight: 600;
+    color: #1d1d1f;
+    padding: 1.15rem 1rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+    position: relative;
+  }
+
+  .table th:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .table td {
+    padding: 1rem 1rem;
+    font-size: 0.9rem;
+    color: #424245;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    vertical-align: middle;
+  }
+
+  .table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .table tbody tr {
+    transition: background-color 0.3s ease;
+  }
+
+  .table tbody tr:hover {
+    background-color: rgba(0, 112, 245, 0.03);
+  }
+
+  .progress {
+    height: 8px;
+    border-radius: 4px;
+    background-color: var(--apple-light-gray);
+    overflow: hidden;
+    margin: 1.5rem 0;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .progress-bar {
+    background: linear-gradient(90deg, var(--apple-blue) 0%, var(--apple-light-blue) 100%);
+    transition: width 0.3s ease;
+    background-size: 200% 100%;
+    animation: gradientShift 2s linear infinite;
+  }
+
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .step-list {
+    margin-top: 2rem;
+  }
+
+  .step-item {
+    display: flex;
+    align-items: center;
+    padding: 1.15rem 1.5rem;
+    border-radius: 16px;
+    margin-bottom: 0.85rem;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    background: var(--apple-lighter-gray);
+    border: 1px solid rgba(209, 213, 219, 0.3);
+  }
+
+  .step-item.active {
+    background: rgba(0, 112, 245, 0.08);
+    transform: translateX(5px) scale(1.02);
+    border-color: rgba(0, 112, 245, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 112, 245, 0.1);
+  }
+
+  .step-item.completed {
+    background: rgba(52, 199, 89, 0.08);
+    border-color: rgba(52, 199, 89, 0.2);
+  }
+
+  .step-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1.25rem;
+    background: white;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+  }
+
+  .step-item.active .step-icon {
+    transform: scale(1.1);
+    box-shadow: 0 5px 12px rgba(0, 112, 245, 0.2);
+  }
+
+  .step-item.completed .step-icon {
+    transform: scale(1.1);
+    box-shadow: 0 5px 12px rgba(52, 199, 89, 0.2);
+  }
+
+  .step-text {
+    font-weight: 500;
+    color: #1d1d1f;
+    font-size: 1rem;
+  }
+
+  .file-info {
+    background: rgba(242, 242, 247, 0.8);
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-top: 2rem;
+    border: 1px solid rgba(209, 213, 219, 0.3);
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.5s ease forwards;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .file-info-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .file-details {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  .file-icon {
+    font-size: 2rem;
+    color: var(--apple-blue);
+    margin-right: 1rem;
+    filter: drop-shadow(0 2px 5px rgba(0, 112, 245, 0.2));
+  }
+
+  .file-text {
+    line-height: 1.5;
+  }
+
+  .file-name {
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 0.25rem;
+  }
+
+  .file-size {
+    color: var(--apple-gray);
+    font-size: 0.875rem;
+  }
+
+  .file-actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .btn {
+    border-radius: 16px;
+    padding: 0.75rem 1.75rem;
+    font-weight: 500;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.3px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+    transform: translateX(-100%);
+    transition: transform 1s ease;
+  }
+
+  .btn:hover::before {
+    transform: translateX(100%);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-dark-blue) 100%);
+    border: none;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #0077FF 0%, #0060D6 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 112, 245, 0.3);
+  }
+
+  .btn-primary:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 112, 245, 0.2);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--apple-green) 0%, #25A846 100%);
+    border: none;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: linear-gradient(135deg, #40D866 0%, #2CB64E 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(52, 199, 89, 0.3);
+  }
+
+  .btn-success:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(52, 199, 89, 0.2);
+  }
+
+  .btn-light {
+    background: linear-gradient(135deg, #ffffff 0%, #f5f5f7 100%);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #1d1d1f;
+  }
+
+  .btn-light:hover {
+    background: linear-gradient(135deg, #f5f5f7 0%, #e6e6e6 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-light:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  .success-card {
+    text-align: center;
+    padding: 5rem 2.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 28px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .success-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--apple-green), #40D866);
+  }
+
+  .success-icon {
+    font-size: 6rem;
+    color: var(--apple-green);
+    margin-bottom: 2rem;
+    animation: successPulse 1.5s ease-in-out;
+    filter: drop-shadow(0 5px 15px rgba(52, 199, 89, 0.3));
+  }
+
+  @keyframes successPulse {
+    0% {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+
+    50% {
+      transform: scale(1.15);
+      opacity: 1;
+    }
+
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .success-title {
+    font-size: 2.25rem;
+    color: #1d1d1f;
+    margin-bottom: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .success-text {
+    color: #424245;
+    margin-bottom: 2.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+  }
+
+  .action-btn {
+    padding: 0.85rem 2.25rem;
+    border-radius: 16px;
+    font-weight: 500;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    min-width: 180px;
+  }
+
+  .card-highlight {
+    position: relative;
+    z-index: 1;
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 10px 20px rgba(0, 0, 0, 0.04);
+  }
+
+  .card-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--apple-blue), #40A9FF);
+    z-index: 1;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    border-radius: 16px;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(209, 213, 219, 0.3);
+  }
+
+  .required-field {
+    color: var(--apple-blue);
+    font-weight: 600;
+  }
+
+  .note-text {
+    border-left: 4px solid var(--apple-blue);
+    margin-top: 1.75rem;
+    font-size: 0.95rem;
+    color: #424245;
+    background: rgba(0, 112, 245, 0.05);
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    line-height: 1.5;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.02);
+  }
+
+  .note-text i {
+    color: var(--apple-blue);
+  }
+
+  .btn-reset {
+    background: none;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 12px;
+    color: #8E8E93;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-reset:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #FF3B30;
+    transform: scale(1.1);
+  }
+
+  .upload-btn {
+    min-width: 110px;
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .page-container {
+      padding: 1.25rem;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .module-card {
+      margin-bottom: 2rem;
+    }
+
+    .success-title {
+      font-size: 1.75rem;
+    }
+
+    .success-text {
+      font-size: 1rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        {% if upload_success %}
+        <div class="success-card">
+          <div class="check-mark">
+            <i class="fas fa-check-circle success-icon"></i>
+          </div>
+          <h2 class="success-title">上传成功！</h2>
+          <p class="success-text">警情数据已成功上传至区块链并生成相应的PDF凭证文件。数据现已受到区块链技术的保护，确保真实性和完整性。</p>
+          <div class="action-buttons">
+            <a href="{{ url_for('upload_file') }}" class="btn btn-primary action-btn">
+              <i class="fas fa-upload me-2"></i>继续上传
+            </a>
+            <a href="{{ url_for('query') }}" class="btn btn-success action-btn">
+              <i class="fas fa-search me-2"></i>查看记录
+            </a>
+          </div>
+        </div>
+        {% else %}
+        <div class="row g-4">
+          <!-- 文件上传区域 - 突出显示 -->
+          <div class="col-md-4 order-md-3">
+            <div class="module-card card-highlight">
+              <div class="module-header">
+                <i class="fas fa-cloud-upload-alt"></i>文件上传
+              </div>
+              <div class="module-body">
+                <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" id="uploadForm">
+                  <div class="upload-area" id="drop-area">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <h3 class="mb-3">拖拽文件到此处</h3>
+                    <p class="text-muted mb-4">或点击下方按钮选择 CSV 文件</p>
+                    <input type="file" name="file" id="file" class="d-none" accept=".csv">
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('file').click()">
+                      <i class="fas fa-file-upload me-2"></i>选择文件
+                    </button>
+                  </div>
+
+                  <div id="file-info" class="file-info d-none">
+                    <div class="file-info-content">
+                      <div class="file-details">
+                        <i class="fas fa-file-csv file-icon"></i>
+                        <div class="file-text">
+                          <div class="file-name" id="selected-filename"></div>
+                          <div class="file-size" id="selected-filesize"></div>
+                        </div>
+                      </div>
+                      <div class="file-actions">
+                        <button type="button" class="btn-reset" id="back-button" title="返回选择文件">
+                          <i class="fas fa-times"></i>
+                        </button>
+                        <button type="submit" class="btn btn-primary upload-btn">
+                          <i class="fas fa-upload me-2"></i>上传
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+
+                <div id="progress-wrapper" class="d-none mt-4">
+                  <h5 class="text-center mb-4" id="progress-status">正在处理...</h5>
+                  <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                      style="width: 0%" id="progress-bar"></div>
+                  </div>
+                  <div class="text-center mb-4">
+                    <small class="text-muted" id="progress-percentage">0%</small>
+                  </div>
+
+                  <div class="step-list" id="progress-steps">
+                    <div class="step-item" data-step="1">
+                      <div class="step-icon">
+                        <i class="far fa-circle text-muted"></i>
+                      </div>
+                      <div class="step-text">上传CSV文件</div>
+                    </div>
+                    <div class="step-item" data-step="2">
+                      <div class="step-icon">
+                        <i class="far fa-circle text-muted"></i>
+                      </div>
+                      <div class="step-text">解析数据记录</div>
+                    </div>
+                    <div class="step-item" data-step="3">
+                      <div class="step-icon">
+                        <i class="far fa-circle text-muted"></i>
+                      </div>
+                      <div class="step-text">生成区块链哈希</div>
+                    </div>
+                    <div class="step-item" data-step="4">
+                      <div class="step-icon">
+                        <i class="far fa-circle text-muted"></i>
+                      </div>
+                      <div class="step-text">生成PDF文档</div>
+                    </div>
+                    <div class="step-item" data-step="5">
+                      <div class="step-icon">
+                        <i class="far fa-circle text-muted"></i>
+                      </div>
+                      <div class="step-text">上传至IPFS网络</div>
+                    </div>
+                    <div class="step-item" data-step="6">
+                      <div class="step-icon">
+                        <i class="far fa-circle text-muted"></i>
+                      </div>
+                      <div class="step-text">写入数据库</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 操作说明 -->
+          <div class="col-md-4 order-md-1">
+            <div class="module-card">
+              <div class="module-header">
+                <i class="fas fa-info-circle"></i>操作说明
+              </div>
+              <div class="module-body">
+                <ul class="instructions-list">
+                  <li>支持上传 CSV 格式的警情数据文件</li>
+                  <li>CSV 文件需包含以下<span class="required-field">必需</span>字段：警情编号、接警时间、出警人、处置结果、GPS位置</li>
+                  <li>可选字段包括：报警类型、事件地点描述、联系人姓名、联系人电话、优先级、处理部门、警情描述、出警时间</li>
+                  <li>上传文件后，系统会自动处理并将数据上链存证</li>
+                  <li>系统将为每条警情记录生成 PDF 凭证文件</li>
+                  <li>PDF凭证将上传到IPFS分布式存储网络，确保数据不可篡改</li>
+                  <li>所有数据将通过区块链和IPFS双重保障，确保真实可信</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- CSV示例 -->
+          <div class="col-md-4 order-md-2">
+            <div class="module-card">
+              <div class="module-header">
+                <i class="fas fa-table"></i>CSV 文件格式示例
+              </div>
+              <div class="module-body">
+                <div class="table-container">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>警情编号*</th>
+                        <th>接警时间*</th>
+                        <th>出警人*</th>
+                        <th>处置结果*</th>
+                        <th>GPS位置*</th>
+                        <th>报警类型</th>
+                        <th>地点描述</th>
+                        <th>联系人</th>
+                        <th>联系电话</th>
+                        <th>警情描述</th>
+                        <th>出警时间</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>POL20240601001</td>
+                        <td>2024-06-01 08:30:00</td>
+                        <td>张警官</td>
+                        <td>纠纷已调解完毕</td>
+                        <td>39.123456,116.654321</td>
+                        <td>邻里纠纷</td>
+                        <td>北京市朝阳区建国路</td>
+                        <td>王先生</td>
+                        <td>13812345678</td>
+                        <td>邻居之间出现纠纷</td>
+                        <td>2024-06-01 08:45:00</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="mt-2">
+                  <small class="text-muted">* 标记的为必填字段</small>
+                </div>
+                <div class="note-text">
+                  <i class="fas fa-exclamation-circle me-2"></i>
+                  请确保报警人(联系人)与处置人员(出警人)不是同一人，出警时间应晚于接警时间
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(document).ready(function () {
+    // 初始卡片动画效果
+    setTimeout(function () {
+      $('.module-card').each(function (index) {
+        const card = $(this);
+        setTimeout(function () {
+          card.css({
+            'opacity': '1',
+            'transform': index === 2 ? 'translateY(-10px)' : 'translateY(0)'
+          });
+        }, 100 * index);
+      });
+    }, 100);
+
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file');
+    const fileInfo = document.getElementById('file-info');
+    const selectedFilename = document.getElementById('selected-filename');
+    const selectedFilesize = document.getElementById('selected-filesize');
+    const progressWrapper = document.getElementById('progress-wrapper');
+    const progressBar = document.getElementById('progress-bar');
+    const progressStatus = document.getElementById('progress-status');
+    const progressPercentage = document.getElementById('progress-percentage');
+    const stepItems = document.querySelectorAll('.step-item');
+
+    // 添加CSS
+    $('.module-card').css({
+      'opacity': '0',
+      'transform': 'translateY(20px)',
+      'transition': 'all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1)'
+    });
+
+    // 文件拖拽处理
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+      $(dropArea).addClass('bg-light');
+      $(dropArea).css({
+        'border-color': '#0070F5',
+        'transform': 'scale(1.02)',
+        'box-shadow': '0 10px 25px rgba(0, 112, 245, 0.2)'
+      });
+
+      // 云图标动画
+      $('.upload-icon').css({
+        'transform': 'translateY(-12px) scale(1.1)',
+        'color': '#0077FF'
+      });
+    }
+
+    function unhighlight(e) {
+      $(dropArea).removeClass('bg-light');
+      $(dropArea).css({
+        'border-color': 'rgba(209, 213, 219, 0.5)',
+        'transform': 'scale(1)',
+        'box-shadow': 'none'
+      });
+
+      // 重置云图标
+      $('.upload-icon').css({
+        'transform': 'translateY(0) scale(1)',
+        'color': '#0070F5'
+      });
+    }
+
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFiles(files);
+
+      // 添加动画效果
+      $(dropArea).animate({
+        'opacity': 0.8
+      }, 200, function () {
+        $(dropArea).animate({
+          'opacity': 1
+        }, 200);
+      });
+    }
+
+    fileInput.addEventListener('change', function () {
+      handleFiles(this.files);
+    });
+
+    function handleFiles(files) {
+      if (files.length > 0) {
+        const file = files[0];
+        if (file.name.endsWith('.csv')) {
+          showFileInfo(file);
+        } else {
+          // 添加摇动动画
+          $(dropArea).css({ 'animation': 'shake 0.5s ease' });
+          setTimeout(() => {
+            $(dropArea).css({ 'animation': 'none' });
+          }, 500);
+
+          alert('请选择CSV格式的文件');
+          fileInput.value = '';
+        }
+      }
+    }
+
+    function showFileInfo(file) {
+      selectedFilename.textContent = file.name;
+      selectedFilesize.textContent = formatFileSize(file.size);
+
+      // 平滑过渡
+      $(dropArea).slideUp(300, function () {
+        $(fileInfo).removeClass('d-none').hide().slideDown(400);
+      });
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    $('#uploadForm').on('submit', function (e) {
+      if (!fileInput.files.length) {
+        alert('请先选择文件');
+        return false;
+      }
+
+      // 表单提交动画
+      $(fileInfo).slideUp(300, function () {
+        $(progressWrapper).removeClass('d-none').hide().slideDown(400, function () {
+          startProgress();
+        });
+      });
+
+      // 添加审计记录功能
+      var formData = new FormData(this);
+      var file = formData.get('file');
+      if (file) {
+        if (typeof auditTrail !== 'undefined' && typeof auditTrail.recordCustomAction === 'function') {
+          auditTrail.recordCustomAction('准备上传文件', '文件名: ' + file.name);
+        }
+      }
+
+      return true;
+    });
+
+    // 处理返回按钮点击事件
+    $('#back-button').on('click', function () {
+      // 隐藏文件信息区域
+      $(fileInfo).slideUp(300, function () {
+        // 显示文件上传区域
+        $(dropArea).slideDown(400);
+        // 清空文件输入框
+        fileInput.value = '';
+      });
+    });
+
+    function startProgress() {
+      let progress = 0;
+      let currentStep = 0;
+
+      // 进度条初始动画
+      $('#progress-bar').css({
+        'width': '0%',
+        'background-size': '200% 100%'
+      });
+
+      const interval = setInterval(() => {
+        progress += Math.random() * 2;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+        }
+
+        progress = Math.min(progress, 100);
+        $('#progress-bar').css('width', `${progress}%`);
+        progressPercentage.textContent = `${Math.round(progress)}%`;
+
+        const newStep = Math.floor(progress / (100 / stepItems.length));
+        if (newStep > currentStep) {
+          currentStep = newStep;
+          updateSteps(currentStep);
+        }
+
+        const statusTexts = [
+          '正在上传CSV文件...',
+          '正在解析数据记录...',
+          '正在生成区块链哈希...',
+          '正在生成PDF文档...',
+          '正在上传至IPFS网络...',
+          '正在写入数据库...'
+        ];
+
+        // 平滑切换状态文本
+        $('#progress-status').fadeOut(200, function () {
+          $(this).text(statusTexts[Math.min(currentStep, statusTexts.length - 1)]).fadeIn(200);
+        });
+      }, 200);
+    }
+
+    function updateSteps(currentStep) {
+      stepItems.forEach((item, index) => {
+        const icon = item.querySelector('i');
+        const $item = $(item);
+
+        if (index < currentStep) {
+          // 已完成步骤
+          $item.removeClass('active').addClass('completed');
+          $(icon).fadeOut(200, function () {
+            $(this).removeClass().addClass('fas fa-check-circle text-success').fadeIn(200);
+          });
+        } else if (index === currentStep) {
+          // 当前步骤
+          $item.removeClass('completed').addClass('active');
+          $(icon).fadeOut(200, function () {
+            $(this).removeClass().addClass('fas fa-spinner fa-spin text-primary').fadeIn(200);
+          });
+
+          // 添加步骤动画效果
+          $item.css({
+            'transform': 'translateX(5px) scale(1.02)'
+          });
+        } else {
+          // 未开始步骤
+          $item.removeClass('completed active');
+          $(icon).removeClass().addClass('far fa-circle text-muted');
+
+          // 重置步骤样式
+          $item.css({
+            'transform': 'translateX(0) scale(1)'
+          });
+        }
+      });
+    }
+
+    // 给指令列表添加鼠标悬停效果
+    $('.instructions-list li').hover(
+      function () {
+        $(this).css({
+          'background-color': 'rgba(0, 112, 245, 0.05)',
+          'padding-left': '2.5rem'
+        });
+        $(this).find('::before').css({
+          'transform': 'scale(1.25)',
+          'background': '#0255CC'
+        });
+      },
+      function () {
+        $(this).css({
+          'background-color': 'transparent',
+          'padding-left': '2.25rem'
+        });
+        $(this).find('::before').css({
+          'transform': 'scale(1)',
+          'background': 'var(--apple-blue)'
+        });
+      }
+    );
+
+    // 添加CSS动画
+    $('<style>')
+      .prop('type', 'text/css')
+      .html(`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20%, 60% { transform: translateX(-5px); }
+          40%, 80% { transform: translateX(5px); }
+        }
+      `)
+      .appendTo('head');
+  });
+</script>
+{% endblock %}

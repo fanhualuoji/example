@@ -1,0 +1,1086 @@
+{% extends "layout.html" %}
+
+{% block title %}审计记录查询{% endblock %}
+
+{% block head %}
+<style>
+  .audit-container {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+  }
+
+  .audit-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .audit-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  .audit-header {
+    background: linear-gradient(45deg, #4158D0, #6C63FF);
+    color: white;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .audit-header::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    clip-path: polygon(100% 0, 0% 100%, 100% 100%);
+  }
+
+  .audit-header h4 {
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+  }
+
+  .audit-header h4 i {
+    margin-right: 12px;
+    font-size: 1.5rem;
+  }
+
+  .audit-body {
+    padding: 1.5rem;
+  }
+
+  .search-form {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .search-form:hover {
+    background: #f0f2f5;
+  }
+
+  .search-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #495057;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-title i {
+    margin-right: 8px;
+    color: #6C63FF;
+  }
+
+  .form-floating {
+    margin-bottom: 1rem;
+  }
+
+  .form-floating>.form-control {
+    padding: 1rem 0.75rem;
+  }
+
+  .audit-btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 50px;
+    border: none;
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .audit-btn i {
+    margin-right: 8px;
+  }
+
+  .btn-audit-primary {
+    background: linear-gradient(45deg, #4158D0, #6C63FF);
+    box-shadow: 0 4px 15px rgba(108, 99, 255, 0.25);
+  }
+
+  .btn-audit-primary:hover {
+    background: linear-gradient(45deg, #3B4EC9, #5B52FF);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 99, 255, 0.35);
+  }
+
+  .btn-audit-info {
+    background: linear-gradient(45deg, #2193b0, #6dd5ed);
+    box-shadow: 0 4px 15px rgba(33, 147, 176, 0.25);
+  }
+
+  .btn-audit-info:hover {
+    background: linear-gradient(45deg, #1C8AA6, #5BCBE3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(33, 147, 176, 0.35);
+  }
+
+  .record-detail-card {
+    background: linear-gradient(135deg, #e0f7fa 0%, #f3e5f5 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 5px solid #6C63FF;
+  }
+
+  .record-detail-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: #4158D0;
+    font-weight: 600;
+  }
+
+  .record-detail-title i {
+    margin-right: 8px;
+    font-size: 1.2rem;
+  }
+
+  .record-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .record-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    padding: 1rem;
+  }
+
+  .record-table td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .recent-records-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    margin-top: 2rem;
+  }
+
+  .recent-records-header {
+    background: linear-gradient(45deg, #2193b0, #6dd5ed);
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .recent-records-header i {
+    margin-right: 8px;
+    font-size: 1.2rem;
+  }
+
+  .recent-records-body {
+    padding: 1.5rem;
+  }
+
+  .recent-table {
+    width: 100%;
+  }
+
+  .recent-table th {
+    font-weight: 600;
+    background: #f8f9fa;
+    color: #495057;
+  }
+
+  .recent-table tbody tr {
+    transition: all 0.2s ease;
+  }
+
+  .recent-table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .record-tag {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: white;
+  }
+
+  .tag-login {
+    background: linear-gradient(45deg, #00b09b, #96c93d);
+  }
+
+  .tag-logout {
+    background: linear-gradient(45deg, #3a7bd5, #00d2ff);
+  }
+
+  .tag-upload {
+    background: linear-gradient(45deg, #4158D0, #6C63FF);
+  }
+
+  .tag-verify {
+    background: linear-gradient(45deg, #ff9966, #ff5e62);
+  }
+
+  .tag-revoke {
+    background: linear-gradient(45deg, #ED213A, #93291E);
+  }
+
+  .tag-query {
+    background: linear-gradient(45deg, #2193b0, #6dd5ed);
+  }
+
+  .tag-other {
+    background: linear-gradient(45deg, #606c88, #3f4c6b);
+  }
+
+  .btn-view {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    background: linear-gradient(45deg, #4158D0, #6C63FF);
+    border: none;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .btn-view i {
+    margin-right: 5px;
+  }
+
+  .btn-view:hover {
+    background: linear-gradient(45deg, #3B4EC9, #5B52FF);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(108, 99, 255, 0.25);
+  }
+
+  .audit-empty {
+    background: #f8f9fa;
+    padding: 3rem 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    color: #6c757d;
+  }
+
+  .audit-empty i {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    color: #dee2e6;
+  }
+
+  .audit-empty h5 {
+    margin-bottom: 1rem;
+    color: #495057;
+  }
+
+  .action-type-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-right: 8px;
+    color: white;
+  }
+
+  .icon-login {
+    background: linear-gradient(45deg, #00b09b, #96c93d);
+  }
+
+  .icon-logout {
+    background: linear-gradient(45deg, #3a7bd5, #00d2ff);
+  }
+
+  .icon-upload {
+    background: linear-gradient(45deg, #4158D0, #6C63FF);
+  }
+
+  .icon-verify {
+    background: linear-gradient(45deg, #ff9966, #ff5e62);
+  }
+
+  .icon-revoke {
+    background: linear-gradient(45deg, #ED213A, #93291E);
+  }
+
+  .icon-query {
+    background: linear-gradient(45deg, #2193b0, #6dd5ed);
+  }
+
+  .icon-other {
+    background: linear-gradient(45deg, #606c88, #3f4c6b);
+  }
+
+  .timestamp-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    background: #f0f2f5;
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-top: 5px;
+  }
+
+  .timestamp-badge i {
+    margin-right: 5px;
+    color: #6c757d;
+  }
+
+  @media (max-width: 768px) {
+    .search-container {
+      flex-direction: column;
+    }
+
+    .search-form {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .stat-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    flex: 1;
+    min-width: 200px;
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: white;
+    font-size: 1.5rem;
+  }
+
+  .stat-icon-blue {
+    background: linear-gradient(45deg, #4158D0, #6C63FF);
+  }
+
+  .stat-icon-green {
+    background: linear-gradient(45deg, #00b09b, #96c93d);
+  }
+
+  .stat-icon-orange {
+    background: linear-gradient(45deg, #ff9966, #ff5e62);
+  }
+
+  .stat-icon-purple {
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+  }
+
+  .stat-content {
+    flex: 1;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin: 0;
+  }
+
+  @media (max-width: 576px) {
+    .stat-card {
+      flex: 100%;
+    }
+  }
+
+  .chart-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .chart-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+  }
+
+  .chart-title i {
+    color: #6C63FF;
+    margin-right: 8px;
+  }
+
+  .chart-body {
+    position: relative;
+    height: 260px;
+  }
+
+  .no-data-message {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .no-data-message i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #dee2e6;
+  }
+
+  /* 新增分页样式 */
+  .pagination-rounded .page-item .page-link {
+    border-radius: 50%;
+    margin: 0 3px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    border: none;
+    color: #495057;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+
+  .pagination-rounded .page-item.active .page-link {
+    background-color: #6C63FF;
+    color: white;
+    box-shadow: 0 4px 10px rgba(108, 99, 255, 0.3);
+  }
+
+  .pagination-rounded .page-item .page-link:hover:not(.disabled) {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .pagination-rounded .page-item.disabled .page-link {
+    background-color: #f8f9fa;
+    color: #adb5bd;
+  }
+
+  .per-page-form .form-select {
+    border-radius: 50px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    padding: 0.3rem 1.75rem 0.3rem 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .per-page-form .form-select:focus {
+    border-color: #6C63FF;
+    box-shadow: 0 0 0 0.25rem rgba(108, 99, 255, 0.25);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="audit-container">
+    <div class="audit-card mb-4">
+      <div class="audit-header">
+        <h4><i class="fas fa-history"></i>区块链审计记录查询</h4>
+      </div>
+      <div class="audit-body">
+        {% if not record %}
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-blue">
+              <i class="fas fa-history"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value">{{ total_records|default(0) }}</h3>
+              <p class="stat-label">总审计记录</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-green">
+              <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value">{{ today_records|default(0) }}</h3>
+              <p class="stat-label">今日审计记录</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-orange">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value">{{ alert_records|default(0) }}</h3>
+              <p class="stat-label">警告记录</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-purple">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value">{{ user_count|default(0) }}</h3>
+              <p class="stat-label">操作用户数</p>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if not record %}
+        <div class="row">
+          <div class="col-12">
+            <div class="search-form">
+              <div class="search-title">
+                <i class="fas fa-filter"></i>综合条件查询
+              </div>
+              <form id="advancedSearchForm" method="GET" action="{{ url_for('audit_trail') }}">
+                <input type="hidden" name="action" value="advanced_search">
+                <input type="hidden" name="page" value="1">
+                <div class="row mb-3">
+                  <!-- 时间范围选择 -->
+                  <div class="col-md-4">
+                    <label class="form-label"><i class="fas fa-calendar-alt me-1"></i>时间范围</label>
+                    <select class="form-select" id="timeRange" name="time_range" onchange="toggleDateFields()">
+                      <option value="all" {% if search_params and search_params.time_range=='all' %}selected{% endif %}>
+                        所有时间</option>
+                      <option value="today" {% if search_params and search_params.time_range=='today' %}selected{% endif
+                        %}>今天</option>
+                      <option value="week" {% if search_params and search_params.time_range=='week' %}selected{% endif
+                        %}>最近一周</option>
+                      <option value="month" {% if search_params and search_params.time_range=='month' %}selected{% endif
+                        %}>最近一个月</option>
+                      <option value="custom" {% if search_params and search_params.time_range=='custom' %}selected{%
+                        endif %}>自定义时间范围</option>
+                    </select>
+                  </div>
+
+                  <!-- 操作类型筛选 -->
+                  <div class="col-md-4">
+                    <label class="form-label"><i class="fas fa-tag me-1"></i>操作类型</label>
+                    <select class="form-select" name="action_type">
+                      <option value="" {% if not search_params or not search_params.action_type %}selected{% endif %}>
+                        所有操作</option>
+                      <option value="login" {% if search_params and search_params.action_type=='login' %}selected{%
+                        endif %}>用户登录</option>
+                      <option value="logout" {% if search_params and search_params.action_type=='logout' %}selected{%
+                        endif %}>用户登出</option>
+                      <option value="upload" {% if search_params and search_params.action_type=='upload' %}selected{%
+                        endif %}>数据上链</option>
+                      <option value="verify" {% if search_params and search_params.action_type=='verify' %}selected{%
+                        endif %}>数据验证</option>
+                      <option value="revoke" {% if search_params and search_params.action_type=='revoke' %}selected{%
+                        endif %}>数据撤销</option>
+                      <option value="other" {% if search_params and search_params.action_type=='other' %}selected{%
+                        endif %}>其他操作</option>
+                    </select>
+                  </div>
+
+                  <!-- 每页数量设置 -->
+                  <div class="col-md-4">
+                    <label class="form-label"><i class="fas fa-list-ol me-1"></i>每页显示数量</label>
+                    <select class="form-select" name="per_page">
+                      <option value="10" {% if per_page==10 %}selected{% endif %}>10条/页</option>
+                      <option value="20" {% if per_page==20 %}selected{% endif %}>20条/页</option>
+                      <option value="50" {% if per_page==50 %}selected{% endif %}>50条/页</option>
+                      <option value="100" {% if per_page==100 %}selected{% endif %}>100条/页</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 自定义日期范围选择器 -->
+                <div id="dateFields" class="row mb-3"
+                  data-display-mode="{% if search_params and search_params.time_range == 'custom' %}flex{% else %}none{% endif %}">
+                  <div class="col-md-6">
+                    <label class="form-label">开始日期</label>
+                    <input type="date" class="form-control" name="start_date"
+                      value="{{ search_params.start_date if search_params and search_params.start_date else '' }}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">结束日期</label>
+                    <input type="date" class="form-control" name="end_date"
+                      value="{{ search_params.end_date if search_params and search_params.end_date else '' }}">
+                  </div>
+                </div>
+
+                <div class="row">
+                  <!-- 操作人员选择 -->
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label"><i class="fas fa-user me-1"></i>操作人员</label>
+                    <input type="text" class="form-control" name="operator" id="operator" placeholder="输入用户地址或名称"
+                      value="{{ search_params.operator if search_params and search_params.operator else '' }}">
+                  </div>
+
+                  <!-- 警情编号搜索 -->
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label"><i class="fas fa-file-alt me-1"></i>警情编号</label>
+                    <input type="text" class="form-control" name="keywords" id="keywords"
+                      placeholder="输入警情编号（如JQ2023121503）"
+                      value="{{ search_params.keywords if search_params and search_params.keywords else '' }}">
+                  </div>
+                </div>
+
+                <!-- 高级搜索折叠面板 -->
+                <div class="mb-3">
+                  <a class="d-block text-decoration-none" data-bs-toggle="collapse" href="#advancedOptions"
+                    role="button" aria-expanded="false" aria-controls="advancedOptions">
+                    <i class="fas fa-cogs me-1"></i>高级选项 <i class="fas fa-chevron-down ms-1 small"></i>
+                  </a>
+                  <div class="collapse mt-2" id="advancedOptions">
+                    <div class="card card-body bg-light">
+                      <div class="row">
+                        <div class="col-md-6 mb-2">
+                          <label class="form-label">审计记录ID</label>
+                          <input type="text" class="form-control" id="record_id" name="record_id"
+                            placeholder="输入精确的审计记录ID"
+                            value="{{ search_params.record_id if search_params and search_params.record_id else '' }}">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                          <label class="form-label">结果限制</label>
+                          <input type="number" class="form-control" name="limit" id="limit"
+                            value="{{ search_params.limit if search_params and search_params.limit else '100' }}"
+                            min="1" max="200">
+                        </div>
+                      </div>
+                      <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" name="show_warnings_only" id="showWarningsOnly"
+                          {% if search_params and search_params.show_warnings_only %}checked{% endif %}>
+                        <label class="form-check-label" for="showWarningsOnly">
+                          仅显示警告记录
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                  <button type="reset" class="btn btn-outline-secondary me-2" onclick="resetForm()">
+                    <i class="fas fa-redo"></i> 重置
+                  </button>
+                  <button type="submit" class="audit-btn btn-audit-primary">
+                    <i class="fas fa-search"></i> 查询
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if record %}
+        <div class="record-detail-card mt-4">
+          <div class="record-detail-title">
+            <i class="fas fa-info-circle"></i>审计记录详情
+          </div>
+          <div class="table-responsive record-table">
+            <table class="table table-bordered mb-0">
+              <tbody>
+                <tr>
+                  <th style="width: 150px;">记录ID</th>
+                  <td>
+                    <span class="badge bg-primary">{{ record.id }}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>操作用户</th>
+                  <td>
+                    <span class="d-flex align-items-center">
+                      <i class="fas fa-user-circle me-2"></i>
+                      {{ record.user }}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>操作类型</th>
+                  <td>
+                    {% set action_class = get_action_class(record.action) %}
+                    {% set action_display = get_action_display(record.action) %}
+                    <span class="d-flex align-items-center">
+                      <span class="action-type-icon icon-{{ action_class }}">
+                        <i class="{{ get_action_icon(record.action) }}"></i>
+                      </span>
+                      {{ action_display }}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>操作详情</th>
+                  <td>{{ record.details }}</td>
+                </tr>
+                <tr>
+                  <th>操作时间</th>
+                  <td>
+                    <span class="timestamp-badge">
+                      <i class="far fa-clock"></i>
+                      {{ record.timestamp | datetime }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-3">
+            <a href="javascript:history.back()" class="btn-view">
+              <i class="fas fa-arrow-left"></i>返回列表
+            </a>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if recent_records %}
+        <div class="recent-records-card">
+          <div class="recent-records-header">
+            <i class="fas fa-history"></i>
+            <h5 class="m-0">审计记录查询结果</h5>
+          </div>
+          <div class="recent-records-body">
+            <div class="table-responsive">
+              <table class="table table-hover recent-table">
+                <thead>
+                  <tr>
+                    <th>记录ID</th>
+                    <th>操作用户</th>
+                    <th>操作类型</th>
+                    <th>操作详情</th>
+                    <th>操作时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for record in recent_records %}
+                  <tr>
+                    <td>
+                      <span class="badge bg-primary">{{ record.id }}</span>
+                    </td>
+                    <td>
+                      <span class="d-flex align-items-center">
+                        <i class="fas fa-user-circle me-2 text-secondary"></i>
+                        <span class="text-truncate" style="max-width: 150px;" title="{{ record.user }}">
+                          {{ record.user }}
+                        </span>
+                      </span>
+                    </td>
+                    <td>
+                      {% set action_class = get_action_class(record.action) %}
+                      {% set action_display = get_action_display(record.action) %}
+                      <span class="record-tag tag-{{ action_class }}">
+                        <i class="{{ get_action_icon(record.action) }} me-1"></i>
+                        {{ action_display }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="text-truncate d-inline-block" style="max-width: 250px;" title="{{ record.details }}">
+                        {{ record.details }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="timestamp-badge">
+                        <i class="far fa-clock"></i>
+                        {{ record.timestamp | datetime }}
+                      </span>
+                    </td>
+                    <td>
+                      <a href="{{ url_for('audit_trail', record_id=record.id) }}" class="btn-view">
+                        <i class="fas fa-eye"></i>
+                        详情
+                      </a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 分页控件 -->
+            {% if total_pages > 1 %}
+            <div class="pagination-container mt-4">
+              <nav aria-label="审计记录分页">
+                <ul class="pagination pagination-rounded justify-content-center">
+                  <!-- 首页按钮 -->
+                  <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                    <a class="page-link"
+                      href="{{ url_for('audit_trail', page=1, per_page=per_page, search_type=search_type, record_count=record_count, action='advanced_search', **search_params) }}"
+                      aria-label="首页" title="首页">
+                      <i class="fas fa-angle-double-left"></i>
+                    </a>
+                  </li>
+
+                  <!-- 上一页按钮 -->
+                  <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                    <a class="page-link"
+                      href="{{ url_for('audit_trail', page=page-1, per_page=per_page, search_type=search_type, record_count=record_count, action='advanced_search', **search_params) }}"
+                      aria-label="上一页" title="上一页">
+                      <i class="fas fa-angle-left"></i>
+                    </a>
+                  </li>
+
+                  <!-- 页码按钮 -->
+                  {% set page_display_count = 5 %}
+                  {% set half_count = (page_display_count // 2) %}
+                  {% set start_page = [page - half_count, 1] | max %}
+                  {% set end_page = [start_page + page_display_count - 1, total_pages] | min %}
+
+                  {% if start_page > 1 %}
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="{{ url_for('audit_trail', page=1, per_page=per_page, search_type=search_type, record_count=record_count, action='advanced_search', **search_params) }}">1</a>
+                  </li>
+                  {% if start_page > 2 %}
+                  <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                  </li>
+                  {% endif %}
+                  {% endif %}
+
+                  {% for p in range(start_page, end_page + 1) %}
+                  <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link"
+                      href="{{ url_for('audit_trail', page=p, per_page=per_page, search_type=search_type, record_count=record_count, action='advanced_search', **search_params) }}">{{
+                      p }}</a>
+                  </li>
+                  {% endfor %}
+
+                  {% if end_page < total_pages %} {% if end_page < total_pages - 1 %} <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                    </li>
+                    {% endif %}
+                    <li class="page-item">
+                      <a class="page-link"
+                        href="{{ url_for('audit_trail', page=total_pages, per_page=per_page, search_type=search_type, record_count=record_count, action='advanced_search', **search_params) }}">{{
+                        total_pages }}</a>
+                    </li>
+                    {% endif %}
+
+                    <!-- 下一页按钮 -->
+                    <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                      <a class="page-link"
+                        href="{{ url_for('audit_trail', page=page+1, per_page=per_page, search_type=search_type, record_count=record_count, action='advanced_search', **search_params) }}"
+                        aria-label="下一页" title="下一页">
+                        <i class="fas fa-angle-right"></i>
+                      </a>
+                    </li>
+
+                    <!-- 末页按钮 -->
+                    <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                      <a class="page-link"
+                        href="{{ url_for('audit_trail', page=total_pages, per_page=per_page, search_type=search_type, record_count=record_count, action='advanced_search', **search_params) }}"
+                        aria-label="末页" title="末页">
+                        <i class="fas fa-angle-double-right"></i>
+                      </a>
+                    </li>
+                </ul>
+              </nav>
+              <div class="text-center mt-2">
+                <small class="text-muted">共 {{ total_filtered|default(record_count|default(0)) }} 条记录，显示第 {{ ((page - 1)
+                  * per_page) + 1 }} - {{ ((page - 1) * per_page) + recent_records|length }} 条</small>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- 调整每页显示数量的表单 -->
+            <div class="per-page-form mt-3">
+              <form method="GET" action="{{ url_for('audit_trail') }}"
+                class="d-flex justify-content-center align-items-center">
+                <input type="hidden" name="page" value="1">
+                <input type="hidden" name="search_type" value="{{ search_type }}">
+                <input type="hidden" name="action" value="advanced_search">
+                {% if record_count %}
+                <input type="hidden" name="record_count" value="{{ record_count }}">
+                {% endif %}
+                {% if search_params %}
+                {% for key, value in search_params.items() %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                {% endfor %}
+                {% endif %}
+                <label for="per_page" class="me-2">每页显示：</label>
+                <select class="form-select form-select-sm" name="per_page" id="per_page" onchange="this.form.submit()"
+                  style="width: auto;">
+                  <option value="5" {% if per_page==5 %}selected{% endif %}>5条</option>
+                  <option value="10" {% if per_page==10 %}selected{% endif %}>10条</option>
+                  <option value="20" {% if per_page==20 %}selected{% endif %}>20条</option>
+                  <option value="50" {% if per_page==50 %}selected{% endif %}>50条</option>
+                </select>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% elif not record %}
+        <div class="audit-empty mt-4">
+          <i class="fas fa-search"></i>
+          <h5>未查询到审计记录</h5>
+          <p>请输入有效的审计记录ID或查询最近的记录</p>
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-danger mt-3">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          {{ error }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 焦点自动聚焦到搜索框
+    const recordInput = document.getElementById('record_id');
+    if (recordInput) {
+      recordInput.focus();
+    }
+
+    // 悬停效果
+    const recordTags = document.querySelectorAll('.record-tag');
+    recordTags.forEach(tag => {
+      tag.addEventListener('mouseenter', function () {
+        this.style.transform = 'translateY(-2px)';
+      });
+      tag.addEventListener('mouseleave', function () {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+
+    // 添加loading效果
+    const forms = document.querySelectorAll('#recordForm, #advancedSearchForm');
+    forms.forEach(form => {
+      form.addEventListener('submit', function () {
+        const btn = this.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 加载中...';
+        btn.disabled = true;
+
+        setTimeout(function () {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }, 5000);
+      });
+    });
+
+    // 高级选项箭头图标切换
+    const advancedToggle = document.querySelector('[data-bs-toggle="collapse"]');
+    if (advancedToggle) {
+      advancedToggle.addEventListener('click', function () {
+        const chevron = this.querySelector('.fa-chevron-down');
+        if (chevron) {
+          chevron.classList.toggle('fa-chevron-up');
+          chevron.classList.toggle('fa-chevron-down');
+        }
+      });
+    }
+  });
+
+  // 处理自定义日期范围选择器的显示和隐藏
+  function toggleDateFields() {
+    const timeRange = document.getElementById('timeRange');
+    const dateFields = document.getElementById('dateFields');
+
+    if (timeRange && dateFields) {
+      // 初始化时根据data-display-mode属性设置style
+      if (!dateFields.style.display) {
+        const displayMode = dateFields.getAttribute('data-display-mode');
+        dateFields.style.display = displayMode || 'none';
+      }
+
+      // 根据选择更新样式
+      if (timeRange.value === 'custom') {
+        dateFields.style.display = 'flex';
+        dateFields.setAttribute('data-display-mode', 'flex');
+      } else {
+        dateFields.style.display = 'none';
+        dateFields.setAttribute('data-display-mode', 'none');
+      }
+    }
+  }
+
+  // 页面加载时执行
+  document.addEventListener('DOMContentLoaded', function () {
+    // 初始化日期选择器显示状态
+    toggleDateFields();
+
+    // 为表单重置按钮添加事件处理
+    const form = document.getElementById('advancedSearchForm');
+    if (form) {
+      form.addEventListener('reset', function () {
+        // 延迟执行，确保表单重置后再执行
+        setTimeout(function () {
+          toggleDateFields();
+        }, 10);
+      });
+    }
+  });
+
+  // 表单重置功能
+  function resetForm() {
+    // 重定向到审计记录页面，不带任何参数
+    setTimeout(function () {
+      window.location.href = "{{ url_for('audit_trail') }}";
+    }, 100);
+  }
+</script>
+{% endblock %}

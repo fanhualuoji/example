@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>警情区块链系统 - 控制面板</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    .sidebar {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      padding: 48px 0 0;
+      box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+      background-color: #f8f9fa;
+    }
+
+    .sidebar-sticky {
+      height: calc(100vh - 48px);
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    .navbar {
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-link {
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .nav-link.active {
+      color: #007bff;
+    }
+
+    .nav-link:hover {
+      color: #0056b3;
+    }
+
+    .nav-link i {
+      margin-right: 8px;
+    }
+
+    main {
+      padding-top: 48px;
+    }
+
+    .dashboard-card {
+      margin-bottom: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .dashboard-card .card-body {
+      padding: 1.5rem;
+    }
+
+    .dashboard-card .icon {
+      font-size: 2.5rem;
+      color: #007bff;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">警情区块链系统</a>
+    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse"
+      data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-nav">
+      <div class="nav-item text-nowrap">
+        <a class="nav-link px-3 text-white" href="{{ url_for('logout') }}">退出登录</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+        <div class="position-sticky sidebar-sticky pt-3">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" href="{{ url_for('dashboard') }}">
+                <i class="bi bi-speedometer2"></i> 控制面板
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('upload_file') }}">
+                <i class="bi bi-cloud-upload"></i> 数据上传
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('query') }}">
+                <i class="bi bi-search"></i> 数据查询
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div
+          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">控制面板</h1>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card dashboard-card bg-light">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h5 class="card-title">数据上传</h5>
+                    <p class="card-text">上传警情数据到区块链</p>
+                    <a href="{{ url_for('upload_file') }}" class="btn btn-primary">前往上传</a>
+                  </div>
+                  <div class="icon">
+                    <i class="bi bi-cloud-upload"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card dashboard-card bg-light">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h5 class="card-title">数据查询</h5>
+                    <p class="card-text">查询已上链的警情数据</p>
+                    <a href="{{ url_for('query') }}" class="btn btn-primary">前往查询</a>
+                  </div>
+                  <div class="icon">
+                    <i class="bi bi-search"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,802 @@
+{% extends "layout.html" %}
+
+{% block title %}警情数据查询{% endblock %}
+
+{% block head %}
+<style>
+  .query-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+  }
+
+  .header-card {
+    background: linear-gradient(135deg, #0061ff, #60efff);
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    margin-bottom: 2rem;
+    color: white;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 97, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header-card h2 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.8rem;
+    letter-spacing: -0.5px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-card::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(rgba(255, 255, 255, 0.1), transparent);
+    z-index: 0;
+  }
+
+  .search-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .search-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    color: #1d1d1f;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+
+  .search-title i {
+    margin-right: 8px;
+    color: #0061ff;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    border: 1px solid #e5e5e5;
+    background-color: #f5f5f7;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #0061ff;
+    box-shadow: 0 0 0 3px rgba(0, 97, 255, 0.15);
+    background-color: white;
+  }
+
+  .form-label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .search-btn {
+    background: linear-gradient(135deg, #0061ff, #60efff);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.7rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 97, 255, 0.3);
+  }
+
+  .reset-btn {
+    background: #f5f5f7;
+    color: #1d1d1f;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 0.7rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .reset-btn:hover {
+    background: #e5e5e5;
+    transform: translateY(-2px);
+  }
+
+  /* 卡片网格布局 */
+  .records-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  /* 单个记录卡片 */
+  .record-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    aspect-ratio: 1;
+    position: relative;
+  }
+
+  .record-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .record-header {
+    padding: 1rem;
+    background: #f5f5f7;
+    border-bottom: 1px solid #e5e5e5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .record-id {
+    font-weight: 600;
+    color: #1d1d1f;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .record-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .status-active {
+    background: #e3f7e8;
+    color: #34c759;
+  }
+
+  .status-revoked {
+    background: #ffebee;
+    color: #ff3b30;
+  }
+
+  .status-invalid {
+    background: #fff4e3;
+    color: #ff9500;
+  }
+
+  .record-content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .record-detail {
+    margin-bottom: 0.7rem;
+    display: flex;
+    align-items: flex-start;
+    font-size: 0.9rem;
+  }
+
+  .record-detail:last-child {
+    margin-bottom: 0;
+  }
+
+  .detail-label {
+    color: #6e6e73;
+    min-width: 75px;
+    margin-right: 0.5rem;
+  }
+
+  .detail-value {
+    color: #1d1d1f;
+    font-weight: 500;
+    word-break: break-word;
+  }
+
+  .block-badge {
+    background: #e7f1ff;
+    color: #007aff;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .block-badge i {
+    margin-right: 4px;
+    font-size: 0.75rem;
+  }
+
+  .record-actions {
+    padding: 1rem;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+
+  .btn-revoke {
+    background: #ffebee;
+    color: #ff3b30;
+    border: 1px solid rgba(255, 59, 48, 0.2);
+  }
+
+  .btn-revoke:hover {
+    background: #ffcdd2;
+  }
+
+  .btn-download {
+    background: #e3f2fd;
+    color: #0061ff;
+    border: 1px solid rgba(0, 97, 255, 0.2);
+  }
+
+  .btn-download:hover {
+    background: #bbdefb;
+  }
+
+  .btn-disabled {
+    background: #f5f5f7;
+    color: #8e8e93;
+    border: 1px solid #e5e5e5;
+    cursor: not-allowed;
+  }
+
+  /* 批量操作工具栏 */
+  .batch-toolbar {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .batch-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .batch-btn i {
+    margin-right: 6px;
+  }
+
+  .btn-primary-apple {
+    background: #0061ff;
+    color: white;
+    border: none;
+  }
+
+  .btn-primary-apple:hover {
+    background: #0051d6;
+  }
+
+  .btn-secondary-apple {
+    background: #f5f5f7;
+    color: #1d1d1f;
+    border: 1px solid #e5e5e5;
+  }
+
+  .btn-secondary-apple:hover {
+    background: #e5e5e5;
+  }
+
+  .checkbox-apple {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d1d1d6;
+    border-radius: 6px;
+    margin: 0;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .checkbox-apple:checked {
+    background-color: #0061ff;
+    border-color: #0061ff;
+  }
+
+  .checkbox-apple:checked::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .card-checkbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+  }
+
+  /* 分页控件 */
+  .pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem 0 1rem;
+  }
+
+  .page-info {
+    color: #6e6e73;
+    font-size: 0.9rem;
+  }
+
+  .pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 0.5rem;
+  }
+
+  .page-item {
+    display: inline-block;
+  }
+
+  .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    border: none;
+  }
+
+  .page-item.active .page-link {
+    background: #0061ff;
+    color: white;
+  }
+
+  .page-link:hover:not(.disabled) {
+    background: #e5e5e5;
+  }
+
+  .page-item.disabled .page-link {
+    color: #8e8e93;
+    cursor: not-allowed;
+  }
+
+  .page-nav-link {
+    width: auto;
+    padding: 0 15px;
+    border-radius: 18px;
+  }
+
+  .empty-state {
+    background: white;
+    border-radius: 16px;
+    text-align: center;
+    padding: 4rem 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    color: #e5e5e5;
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-message {
+    color: #8e8e93;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* 媒体查询 */
+  @media (max-width: 992px) {
+    .records-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .records-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="query-container">
+  <!-- 头部标题 -->
+  <div class="header-card">
+    <h2><i class="fas fa-search me-2"></i>警情数据查询</h2>
+  </div>
+
+  <!-- 搜索表单 -->
+  <div class="search-card">
+    <div class="search-title">
+      <i class="fas fa-filter"></i>搜索条件
+    </div>
+    <form method="GET" action="{{ url_for('query') }}">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label for="police_no" class="form-label">警情编号</label>
+          <input type="text" class="form-control" id="police_no" name="police_no" value="{{ search_police_no }}"
+            placeholder="输入警情编号">
+        </div>
+        <div class="col-md-4">
+          <label for="officer" class="form-label">出警人</label>
+          <input type="text" class="form-control" id="officer" name="officer" value="{{ search_officer }}"
+            placeholder="输入出警人姓名">
+        </div>
+        <div class="col-md-4">
+          <label for="status" class="form-label">记录状态</label>
+          <select class="form-select" id="status" name="status">
+            <option value="">全部</option>
+            <option value="Active" {% if search_status=='Active' %}selected{% endif %}>正常</option>
+            <option value="Revoked" {% if search_status=='Revoked' %}selected{% endif %}>已撤销</option>
+            <option value="Invalid" {% if search_status=='Invalid' %}selected{% endif %}>无效</option>
+          </select>
+        </div>
+        <div class="col-12 text-center mt-3">
+          <button type="submit" class="search-btn">
+            <i class="fas fa-search me-2"></i>查询
+          </button>
+          <a href="{{ url_for('query') }}" class="reset-btn ms-2">
+            <i class="fas fa-eraser me-2"></i>清空条件
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {% if records %}
+  <!-- 批量操作工具栏 -->
+  <div class="batch-toolbar">
+    <button type="button" id="batch-download-btn" class="batch-btn btn-primary-apple">
+      <i class="fas fa-file-pdf"></i>批量下载选中PDF
+    </button>
+    <button type="button" id="select-all-btn" class="batch-btn btn-secondary-apple">
+      <i class="fas fa-check-square"></i>全选
+    </button>
+    <button type="button" id="deselect-all-btn" class="batch-btn btn-secondary-apple">
+      <i class="fas fa-square"></i>取消全选
+    </button>
+  </div>
+
+  <!-- 记录卡片网格 -->
+  <div class="records-grid">
+    {% for record in records %}
+    <div
+      class="record-card {% if record.RecordStatus=='Revoked' %}card-revoked{% elif record.RecordStatus=='Invalid' %}card-invalid{% endif %}">
+      <!-- 卡片头部 -->
+      <div class="record-header">
+        <div class="record-id">{{ record.PoliceNo }}</div>
+        <div
+          class="record-status {% if record.RecordStatus == 'Active' %}status-active{% elif record.RecordStatus == 'Revoked' %}status-revoked{% else %}status-invalid{% endif %}">
+          {% if record.RecordStatus == 'Active' %}有效{% elif record.RecordStatus == 'Revoked' %}已撤销{% else %}无效{% endif
+          %}
+        </div>
+      </div>
+
+      <!-- 卡片内容 -->
+      <div class="record-content">
+        <div class="record-detail">
+          <span class="detail-label">接警时间:</span>
+          <span class="detail-value">{{ record.ReceiveTime }}</span>
+        </div>
+        <div class="record-detail">
+          <span class="detail-label">出警人:</span>
+          <span class="detail-value">{{ record.PoliceOfficer }}</span>
+        </div>
+        <div class="record-detail">
+          <span class="detail-label">处置结果:</span>
+          <span class="detail-value">{{ record.Result }}</span>
+        </div>
+        <div class="record-detail">
+          <span class="detail-label">GPS位置:</span>
+          <span class="detail-value">{{ record.GPSLocation }}</span>
+        </div>
+        <div class="record-detail">
+          <span class="detail-label">区块号:</span>
+          <span class="detail-value">
+            {% if record.BlockNum %}
+            <div class="block-badge">
+              <i class="fas fa-cube"></i>{{ record.BlockNum }}
+            </div>
+            {% else %}
+            <span class="text-muted">未上链</span>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!-- 卡片操作 -->
+      <div class="record-actions">
+        {% if record.RecordStatus == 'Active' %}
+        <button type="button" class="action-btn btn-revoke revoke-btn" data-record-id="{{ record.PoliceNo }}">
+          <i class="fas fa-ban me-1"></i>撤销
+        </button>
+        {% else %}
+        <button class="action-btn btn-disabled" disabled>
+          {% if record.RecordStatus == 'Invalid' %}无效{% else %}已撤销{% endif %}
+        </button>
+        {% endif %}
+        <a href="{{ url_for('download_pdf', police_no=record.PoliceNo) }}" class="action-btn btn-download">
+          <i class="fas fa-file-pdf me-1"></i>PDF
+        </a>
+      </div>
+
+      <!-- 卡片复选框 -->
+      {% if record.RecordStatus == 'Active' %}
+      <label class="card-checkbox">
+        <input type="checkbox" class="checkbox-apple record-checkbox" name="selected_records"
+          value="{{ record.PoliceNo }}">
+      </label>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- 分页控件 -->
+  <div class="pagination-container">
+    <div class="page-info">共 {{ total_pages }} 页，当前第 {{ page }} 页，每页9条记录</div>
+    <nav aria-label="警情记录分页">
+      <ul class="pagination">
+        {% if page > 1 %}
+        <li class="page-item">
+          <a class="page-link page-nav-link"
+            href="{{ url_for('query', page=page-1, police_no=search_police_no, officer=search_officer, status=search_status) }}">
+            <i class="fas fa-chevron-left me-1"></i>上一页
+          </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link page-nav-link disabled">
+            <i class="fas fa-chevron-left me-1"></i>上一页
+          </span>
+        </li>
+        {% endif %}
+
+        {% for p in range(1, total_pages + 1) %}
+        {% if p >= page - 2 and p <= page + 2 %} <li class="page-item {% if p == page %}active{% endif %}">
+          <a class="page-link"
+            href="{{ url_for('query', page=p, police_no=search_police_no, officer=search_officer, status=search_status) }}">{{
+            p }}</a>
+          </li>
+          {% endif %}
+          {% endfor %}
+
+          {% if page < total_pages %} <li class="page-item">
+            <a class="page-link page-nav-link"
+              href="{{ url_for('query', page=page+1, police_no=search_police_no, officer=search_officer, status=search_status) }}">
+              下一页<i class="fas fa-chevron-right ms-1"></i>
+            </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+              <span class="page-link page-nav-link disabled">
+                下一页<i class="fas fa-chevron-right ms-1"></i>
+              </span>
+            </li>
+            {% endif %}
+      </ul>
+    </nav>
+  </div>
+
+  {% else %}
+  <!-- 无数据状态 -->
+  <div class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-search"></i>
+    </div>
+    <div class="empty-message">暂无警情记录数据</div>
+    <a href="{{ url_for('query') }}" class="search-btn">
+      <i class="fas fa-redo me-2"></i>重新搜索
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- 撤销模态框 -->
+<div class="modal fade" id="revokeModal" tabindex="-1" aria-labelledby="revokeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="revokeModalLabel">撤销警情记录</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="recordIdDisplay" class="form-label">警情编号</label>
+          <input type="text" class="form-control" id="recordIdDisplay" readonly>
+          <input type="hidden" id="recordIdInput">
+        </div>
+        <div class="mb-3">
+          <label for="revokeReason" class="form-label">撤销原因 <span class="text-danger">*</span></label>
+          <textarea class="form-control" id="revokeReason" rows="3" required placeholder="请输入撤销原因..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-danger" id="confirmRevoke">确认撤销</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if records %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 全选/取消全选复选框
+    const recordCheckboxes = document.querySelectorAll('.record-checkbox');
+
+    // 全选按钮
+    document.getElementById('select-all-btn').addEventListener('click', function () {
+      recordCheckboxes.forEach(checkbox => checkbox.checked = true);
+    });
+
+    // 取消全选按钮
+    document.getElementById('deselect-all-btn').addEventListener('click', function () {
+      recordCheckboxes.forEach(checkbox => checkbox.checked = false);
+    });
+
+    // 批量下载按钮
+    document.getElementById('batch-download-btn').addEventListener('click', function () {
+      const selectedCheckboxes = document.querySelectorAll('.record-checkbox:checked');
+
+      if (selectedCheckboxes.length === 0) {
+        alert('请至少选择一条记录!');
+        return;
+      }
+
+      // 依次下载选中的PDF
+      selectedCheckboxes.forEach(function (checkbox, index) {
+        const policeNo = checkbox.value;
+        // 创建延时，避免浏览器同时触发太多下载
+        setTimeout(function () {
+          window.open(`/download_pdf/${policeNo}`, '_blank');
+        }, index * 500); // 每个下载间隔0.5秒
+      });
+    });
+
+    // 添加卡片动效
+    const recordCards = document.querySelectorAll('.record-card');
+    recordCards.forEach(card => {
+      card.addEventListener('mouseenter', function () {
+        this.style.transform = 'translateY(-10px)';
+      });
+
+      card.addEventListener('mouseleave', function () {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+
+    // 撤销按钮点击事件
+    const revokeButtons = document.querySelectorAll('.revoke-btn');
+    const revokeModal = new bootstrap.Modal(document.getElementById('revokeModal'));
+
+    revokeButtons.forEach(button => {
+      button.addEventListener('click', function () {
+        const recordId = this.getAttribute('data-record-id');
+        document.getElementById('recordIdDisplay').value = recordId;
+        document.getElementById('recordIdInput').value = recordId;
+        document.getElementById('revokeReason').value = '';
+        revokeModal.show();
+      });
+    });
+
+    // 确认撤销按钮点击事件
+    document.getElementById('confirmRevoke').addEventListener('click', function () {
+      const recordId = document.getElementById('recordIdInput').value;
+      const reason = document.getElementById('revokeReason').value.trim();
+
+      if (!reason) {
+        alert('请输入撤销原因');
+        return;
+      }
+
+      // 显示加载状态
+      this.disabled = true;
+      this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 处理中...';
+
+      // 发送API请求
+      fetch('/api/revoke_record', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recordId: recordId,
+          reason: reason
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // 关闭模态框
+            revokeModal.hide();
+
+            // 显示成功消息
+            alert('撤销成功: ' + data.message);
+
+            // 重新加载页面以更新UI
+            window.location.reload();
+          } else {
+            // 显示错误消息
+            alert('撤销失败: ' + (data.error || '未知错误'));
+            this.disabled = false;
+            this.innerHTML = '确认撤销';
+          }
+        })
+        .catch(error => {
+          console.error('撤销错误:', error);
+          alert('撤销出错，请查看控制台获取详细信息');
+          this.disabled = false;
+          this.innerHTML = '确认撤销';
+        });
+    });
+  });
+</script>
+{% endif %}
+{% endblock %}

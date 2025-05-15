@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智警链存系统 - 登录</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    :root {
+      /* 颜色 - 亮色模式 */
+      --primary-color: #0066cc;
+      --primary-light: #4d94ff;
+      --primary-dark: #004c99;
+      --secondary-color: #3a7ced;
+      --accent-color: #ff7d45;
+      --success-color: #34c759;
+      --warning-color: #ffcc00;
+      --danger-color: #ff3b30;
+      --info-color: #5ac8fa;
+
+      /* 背景和前景 */
+      --bg-main: #f5f7fa;
+      --bg-content: #ffffff;
+      --bg-card: #ffffff;
+      --bg-header: #ffffff;
+      --bg-footer: #f0f2f5;
+
+      /* 文本颜色 */
+      --text-primary: #1c1c1e;
+      --text-secondary: #3a3a3c;
+      --text-tertiary: #6e6e73;
+      --text-muted: #8e8e93;
+      --text-light: #ffffff;
+
+      /* 边框和阴影 */
+      --border-color: #e5e5ea;
+      --border-light: #f2f2f7;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+      --shadow-focus: 0 0 0 3px rgba(0, 102, 204, 0.25);
+
+      /* 尺寸和间距 */
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-round: 9999px;
+
+      /* 动画 */
+      --transition-fast: 0.15s;
+      --transition-normal: 0.25s;
+      --transition-slow: 0.4s;
+      --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 深色模式变量 */
+    html[data-theme="dark"] {
+      /* 颜色 - 暗色模式 */
+      --primary-color: #0a84ff;
+      --primary-light: #5eb3ff;
+      --primary-dark: #0060cc;
+      --secondary-color: #5e9ced;
+      --accent-color: #ff9f0a;
+
+      /* 背景和前景 */
+      --bg-main: #1c1c1e;
+      --bg-content: #2c2c2e;
+      --bg-card: #323236;
+
+      /* 文本颜色 */
+      --text-primary: #f2f2f7;
+      --text-secondary: #d1d1d6;
+      --text-tertiary: #aeaeb2;
+      --text-muted: #8e8e93;
+      --border-color: #3a3a3c;
+      --border-light: #2c2c2e;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      transition: background-color var(--transition-normal), color var(--transition-normal);
+      background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M90,0 L100,0 L100,10 L90,0 Z M70,0 L100,30 L100,40 L60,0 L70,0 Z M40,0 L100,60 L100,70 L30,0 L40,0 Z M10,0 L100,90 L100,100 L0,0 L10,0 Z M0,30 L70,100 L60,100 L0,40 L0,30 Z M0,60 L40,100 L30,100 L0,70 L0,60 Z M0,90 L10,100 L0,100 L0,90 Z" fill="rgba(0,0,0,0.03)"/></svg>');
+      background-size: 300px 300px;
+    }
+
+    html[data-theme="dark"] body {
+      background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M90,0 L100,0 L100,10 L90,0 Z M70,0 L100,30 L100,40 L60,0 L70,0 Z M40,0 L100,60 L100,70 L30,0 L40,0 Z M10,0 L100,90 L100,100 L0,0 L10,0 Z M0,30 L70,100 L60,100 L0,40 L0,30 Z M0,60 L40,100 L30,100 L0,70 L0,60 Z M0,90 L10,100 L0,100 L0,90 Z" fill="rgba(255,255,255,0.03)"/></svg>');
+    }
+
+    .page-wrapper {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+    }
+
+    .brand-section {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .brand-logo {
+      font-size: 3rem;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+
+    .brand-name {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+
+    .brand-slogan {
+      font-size: 1rem;
+      color: var(--text-tertiary);
+      max-width: 300px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .login-card {
+      background-color: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      transition: transform var(--transition-slow) var(--ease-bounce),
+        box-shadow var(--transition-normal),
+        background-color var(--transition-normal);
+      position: relative;
+      z-index: 10;
+    }
+
+    .login-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      padding: 25px 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M90,0 L100,0 L100,10 L90,0 Z M70,0 L100,30 L100,40 L60,0 L70,0 Z M40,0 L100,60 L100,70 L30,0 L40,0 Z M10,0 L100,90 L100,100 L0,0 L10,0 Z M0,30 L70,100 L60,100 L0,40 L0,30 Z M0,60 L40,100 L30,100 L0,70 L0,60 Z M0,90 L10,100 L0,100 L0,90 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+      opacity: 0.6;
+    }
+
+    .login-title {
+      color: var(--text-light);
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .login-body {
+      padding: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 1rem;
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-content);
+      color: var(--text-primary);
+      transition: all var(--transition-fast);
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: var(--shadow-focus);
+      outline: none;
+    }
+
+    .form-control::placeholder {
+      color: var(--text-muted);
+    }
+
+    .password-container {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: color var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+    }
+
+    .password-toggle:hover {
+      color: var(--primary-color);
+    }
+
+    .login-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: var(--text-light);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      margin-top: 30px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 25px;
+      padding: 0 30px 30px;
+    }
+
+    .login-footer-text {
+      color: var(--text-tertiary);
+      font-size: 0.875rem;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-round);
+      background-color: rgba(0, 0, 0, 0.1);
+      border: none;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+      z-index: 100;
+    }
+
+    html[data-theme="dark"] .theme-toggle {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .theme-toggle:hover {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    html[data-theme="dark"] .theme-toggle:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .dark-icon {
+      display: block;
+    }
+
+    .light-icon {
+      display: none;
+    }
+
+    html[data-theme="dark"] .dark-icon {
+      display: none;
+    }
+
+    html[data-theme="dark"] .light-icon {
+      display: block;
+    }
+
+    .alert {
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .alert-success {
+      background-color: rgba(52, 199, 89, 0.15);
+      border-left: 4px solid var(--success-color);
+      color: var(--success-color);
+    }
+
+    .alert-danger {
+      background-color: rgba(255, 59, 48, 0.15);
+      border-left: 4px solid var(--danger-color);
+      color: var(--danger-color);
+    }
+
+    .alert-warning {
+      background-color: rgba(255, 204, 0, 0.15);
+      border-left: 4px solid var(--warning-color);
+      color: var(--warning-color);
+    }
+
+    .alert-info {
+      background-color: rgba(90, 200, 250, 0.15);
+      border-left: 4px solid var(--info-color);
+      color: var(--info-color);
+    }
+
+    .alert i {
+      font-size: 1.125rem;
+    }
+
+    @media (max-width: 576px) {
+      .login-body {
+        padding: 20px;
+      }
+
+      .login-footer {
+        padding: 0 20px 20px;
+      }
+
+      .brand-logo {
+        font-size: 2.5rem;
+      }
+
+      .brand-name {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <button id="theme-toggle" class="theme-toggle" title="切换主题模式">
+      <i class="fas fa-moon dark-icon"></i>
+      <i class="fas fa-sun light-icon"></i>
+    </button>
+
+    <div class="login-container">
+      <div class="brand-section animate__animated animate__fadeInDown">
+        <div class="brand-logo">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <h1 class="brand-name">智警链存系统</h1>
+        <p class="brand-slogan">警情处置过程区块链可信存证系统</p>
+      </div>
+
+      <div class="login-card animate__animated animate__fadeInUp">
+        <div class="login-header">
+          <h2 class="login-title">用户登录</h2>
+        </div>
+
+        <div class="login-body">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            <i
+              class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' %}fa-exclamation-circle{% elif category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+          </div>
+          {% endfor %}
+          {% endif %}
+          {% endwith %}
+
+          <form action="{{ url_for('login') }}" method="post">
+            <div class="form-group">
+              <label for="username" class="form-label">用户名</label>
+              <input type="text" class="form-control" id="username" name="username" placeholder="请输入用户名" required>
+            </div>
+
+            <div class="form-group">
+              <label for="password" class="form-label">密码</label>
+              <div class="password-container">
+                <input type="password" class="form-control" id="password" name="password" placeholder="请输入密码" required>
+                <button type="button" class="password-toggle" id="togglePassword">
+                  <i class="fas fa-eye-slash"></i>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="login-btn">
+              <i class="fas fa-sign-in-alt me-2"></i> 登录系统
+            </button>
+          </form>
+        </div>
+
+        <div class="login-footer">
+          <p class="login-footer-text">© 2025 智警链存系统</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // 密码切换功能
+      const togglePassword = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+
+      togglePassword.addEventListener('click', function () {
+        // 切换密码显示类型
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+
+        // 切换图标
+        this.querySelector('i').classList.toggle('fa-eye');
+        this.querySelector('i').classList.toggle('fa-eye-slash');
+      });
+
+      // 主题切换功能
+      const themeToggleBtn = document.getElementById('theme-toggle');
+
+      // 检查本地存储中的主题偏好
+      const savedTheme = localStorage.getItem('theme');
+
+      // 如果有保存的主题设置，应用它
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      } else {
+        // 如果没有保存的设置，检查系统偏好
+        const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const initialTheme = prefersDarkMode ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', initialTheme);
+        localStorage.setItem('theme', initialTheme);
+      }
+
+      // 主题切换按钮点击事件
+      if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', function () {
+          const currentTheme = document.documentElement.getAttribute('data-theme');
+          const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+          // 更改主题
+          document.documentElement.setAttribute('data-theme', newTheme);
+
+          // 保存到本地存储
+          localStorage.setItem('theme', newTheme);
+
+          // 按钮动画效果
+          this.classList.add('animate__animated', 'animate__rubberBand');
+          setTimeout(() => {
+            this.classList.remove('animate__animated', 'animate__rubberBand');
+          }, 750);
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

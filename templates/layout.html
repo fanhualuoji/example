@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %} - 警情区块链管理系统</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome 图标 -->
+  <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+  <!-- 动画库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <!-- 自定义CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/modern.css') }}">
+  {% block head %}{% endblock %}
+</head>
+
+<body>
+  <!-- 加载页面动画 -->
+  <div id="page-loader">
+    <div class="loader-content">
+      <div class="spinner"></div>
+      <p>智警链存系统</p>
+    </div>
+  </div>
+
+  <!-- 顶部导航 -->
+  <header class="main-header">
+    <div class="container-fluid">
+      <div class="header-content">
+        <!-- 侧边栏切换按钮 -->
+        <button id="sidebar-toggle" class="sidebar-toggle-btn btn">
+          <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- 系统名称 -->
+        <a class="site-logo" href="{{ url_for('home') }}">
+          <i class="fas fa-shield-alt logo-icon"></i>
+          <span class="logo-text">智警链存</span>
+        </a>
+
+        <!-- 右侧工具栏 -->
+        <div class="header-tools">
+          <!-- 模式切换按钮 -->
+          <button id="theme-toggle" class="btn theme-toggle-btn" title="切换主题模式">
+            <i class="fas fa-moon dark-icon"></i>
+            <i class="fas fa-sun light-icon"></i>
+          </button>
+
+          {% if session.logged_in %}
+          <div class="user-menu">
+            <button class="user-menu-toggle">
+              <i class="fas fa-user-circle user-icon"></i>
+              <span class="user-name">{{ session.username }}</span>
+              <span class="user-badge">{{ session.role }}</span>
+            </button>
+            <div class="user-dropdown">
+              <div class="user-dropdown-header">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                  <h6>{{ session.username }}</h6>
+                  <span>{{ session.role }}</span>
+                </div>
+              </div>
+              <div class="user-dropdown-body">
+                <a href="{{ url_for('logout') }}" class="user-dropdown-item">
+                  <i class="fas fa-sign-out-alt"></i>
+                  <span>退出登录</span>
+                </a>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <a href="{{ url_for('login') }}" class="btn login-btn">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>登录系统</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- 侧边栏 -->
+    <aside class="app-sidebar">
+      <div class="sidebar-content">
+        <div class="app-menu">
+          <a href="{{ url_for('home') }}" class="menu-item {% if request.endpoint == 'home' %}active{% endif %}">
+            <i class="fas fa-home"></i>
+            <span>系统首页</span>
+          </a>
+
+          {% if session.logged_in %}
+          <div class="menu-category">
+            <span>警情数据管理</span>
+          </div>
+          <a href="{{ url_for('upload_file') }}"
+            class="menu-item {% if request.endpoint == 'upload_file' %}active{% endif %}">
+            <i class="fas fa-upload"></i>
+            <span>数据上链</span>
+          </a>
+          <a href="{{ url_for('query') }}" class="menu-item {% if request.endpoint == 'query' %}active{% endif %}">
+            <i class="fas fa-search"></i>
+            <span>数据查询</span>
+          </a>
+
+          <div class="menu-category">
+            <span>区块链操作</span>
+          </div>
+          <a href="{{ url_for('verify') }}" class="menu-item {% if request.endpoint == 'verify' %}active{% endif %}">
+            <i class="fas fa-check-circle"></i>
+            <span>数据验证</span>
+          </a>
+          <a href="{{ url_for('record_revoke') }}"
+            class="menu-item {% if request.endpoint == 'record_revoke' %}active{% endif %}">
+            <i class="fas fa-ban"></i>
+            <span>数据撤销</span>
+          </a>
+          <a href="{{ url_for('audit_trail') }}"
+            class="menu-item {% if request.endpoint == 'audit_trail' %}active{% endif %}">
+            <i class="fas fa-history"></i>
+            <span>审计记录</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="app-main">
+      <!-- 闪现消息 -->
+      <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} animate__animated animate__fadeIn">
+          <div class="alert-content">
+            <i
+              class="alert-icon fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' %}fa-exclamation-circle{% elif category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+          </div>
+          <button type="button" class="alert-close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- 页面内容 -->
+      <div class="content-wrapper">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+  <!-- 底栏 -->
+  <footer class="app-footer">
+    <div class="container-fluid">
+      <div class="footer-content">
+        <p class="copyright">© 2025 智警链存系统</p>
+        <p class="version">Version 2.0</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript依赖 -->
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+  <!-- 自定义JS -->
+  <script src="{{ url_for('static', filename='js/modern.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/audit-trail.js') }}"></script>
+  {% block scripts %}{% endblock %}
+
+  {% if session.username %}
+  <script>
+    // 设置当前用户信息，用于审计日志
+    window.currentUser = "{{ session.username }}";
+  </script>
+  {% endif %}
+</body>
+
+</html>
